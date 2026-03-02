@@ -24,23 +24,38 @@ var openAIOptions = new OpenAIClientOptions()
     Endpoint = endpoint
 };
 
-#region Basic in completion
 // create a chat client
 var client = new OpenAIClient(credential, openAIOptions).GetChatClient(model).AsIChatClient();
 
-// send prompts to the model
-var prompt  = "What is AI? Explain in max 200 words.";
+#region Basic in completion
+
+//// send prompts to the model
+//var prompt  = "What is AI? Explain in max 200 words.";
+//Console.WriteLine($"user >>> {prompt}");
+//Console.WriteLine($"\n");
+
+//var response = await client.GetResponseAsync(prompt);
+
+//Console.WriteLine($"assistant >>> {response}");
+//Console.WriteLine($"\n");
+//Console.WriteLine("-----------------------------");
+//Console.WriteLine($"Tokens used: {response.Usage?.InputTokenCount}");
+//Console.WriteLine($"Tokens out: {response.Usage?.OutputTokenCount}");
+//Console.WriteLine($"Total tokens: {response.Usage?.TotalTokenCount} ");
+//Console.WriteLine("-----------------------------");
+#endregion
+
+
+#region Streaming response
+var prompt = "What is AI? Explain in max 200 words.";
 Console.WriteLine($"user >>> {prompt}");
-Console.WriteLine($"\n");
 
-var response = await client.GetResponseAsync(prompt);
-
-Console.WriteLine($"assistant >>> {response}");
+Console.WriteLine($"assistant >>>"); 
+var responses =  client.GetStreamingResponseAsync(prompt);
+await foreach (var message in responses)
+{
+    Console.Write(message.Text);
+}
 Console.WriteLine($"\n");
-Console.WriteLine("-----------------------------");
-Console.WriteLine($"Tokens used: {response.Usage?.InputTokenCount}");
-Console.WriteLine($"Tokens out: {response.Usage?.OutputTokenCount}");
-Console.WriteLine($"Total tokens: {response.Usage?.TotalTokenCount} ");
-Console.WriteLine("-----------------------------");
 #endregion
 
