@@ -10,8 +10,15 @@ IConfiguration config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()    
     .Build();
 
+//var endpoint = new Uri("https://models.github.ai/inference/chat/completions");
 var endpoint = new Uri("https://models.github.ai/inference");
-var credential = new ApiKeyCredential("GitHub_Models:Token")?? throw new InvalidOperationException("invalid token");
+
+var token = config["GitHubModels:Token"];
+if (string.IsNullOrWhiteSpace(token))
+{
+    throw new InvalidOperationException("API token 'GitHubModels:Token' is missing or empty.");
+}
+var credential = new ApiKeyCredential(token) ?? throw new InvalidOperationException("invalid token");
 var model = "openai/gpt-5-mini";
 var openAIOptions = new OpenAIClientOptions()
 {
