@@ -5,12 +5,11 @@ using OpenAI;
 using OpenAI.Chat;
 using System.ClientModel;
 
-//Console.WriteLine("Hello, World!");
+// setup configuration to read API token from user secrets
 IConfiguration config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()    
     .Build();
 
-//var endpoint = new Uri("https://models.github.ai/inference/chat/completions");
 var endpoint = new Uri("https://models.github.ai/inference");
 
 var token = config["GitHubModels:Token"];
