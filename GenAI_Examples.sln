@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatGPT_4o_mini_Model", "Ch
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeepSeek-R1_Model", "DeepSeek-R1_Model\DeepSeek-R1_Model.csproj", "{D6C72193-218B-43C3-BE8E-7817C126962D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meta-Llama-3.1_Model", "Meta-Llama-3.1_Model\Meta-Llama-3.1_Model.csproj", "{DA693A3A-1C16-41AB-AC29-C84290A24D51}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{D6C72193-218B-43C3-BE8E-7817C126962D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6C72193-218B-43C3-BE8E-7817C126962D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6C72193-218B-43C3-BE8E-7817C126962D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA693A3A-1C16-41AB-AC29-C84290A24D51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA693A3A-1C16-41AB-AC29-C84290A24D51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA693A3A-1C16-41AB-AC29-C84290A24D51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA693A3A-1C16-41AB-AC29-C84290A24D51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
