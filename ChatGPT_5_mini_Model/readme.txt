@@ -14,3 +14,7 @@
 4. If the repository has a discussion section or a community forum, you can check there for any discussions related to the model's performance or compatibility.
 5. If you have access to the code, you can try running the model locally to see if it works as expected. Follow the instructions provided in the repository for setting up and running the model.
 6. If you encounter any issues while using the model, consider reaching out to the repository maintainers or the community for support. They may be able to provide guidance or help troubleshoot any problems you are facing.
+
+
+Noted: This model is hosting in Github Models, to verify this work as expected go to Github.com>Marketplace>Models. Select specific model then check code tab.
+If it is available that mean it is working fine

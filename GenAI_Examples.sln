@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp", "ChatApp\ChatApp.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatGPT_4o_mini_Model", "ChatGPT_4o_mini_Model\ChatGPT_4o_mini_Model.csproj", "{F067F656-DF1A-4018-AFE2-EC76A2E65C71}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeepSeek-R1_Model", "DeepSeek-R1_Model\DeepSeek-R1_Model.csproj", "{D6C72193-218B-43C3-BE8E-7817C126962D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{F067F656-DF1A-4018-AFE2-EC76A2E65C71}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F067F656-DF1A-4018-AFE2-EC76A2E65C71}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F067F656-DF1A-4018-AFE2-EC76A2E65C71}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6C72193-218B-43C3-BE8E-7817C126962D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6C72193-218B-43C3-BE8E-7817C126962D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6C72193-218B-43C3-BE8E-7817C126962D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6C72193-218B-43C3-BE8E-7817C126962D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

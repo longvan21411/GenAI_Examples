@@ -1,20 +1,16 @@
 ﻿using Azure;
 using Azure.AI.Inference;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Threading;
 
 // setup configuration to read API token from user secrets
 IConfiguration config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
+
 var token = config["GitHubAIModels:Token"];
 if (string.IsNullOrWhiteSpace(token))
-{
     throw new InvalidOperationException("API token 'GitHubModels:Token' is missing or empty.");
-}
+
 var credential = new AzureKeyCredential(token);
 
 var client = new ChatCompletionsClient(
@@ -23,7 +19,6 @@ var client = new ChatCompletionsClient(
     new AzureAIInferenceClientOptions());
 
 #region Basic text completion
-
 //var requestOptions = new ChatCompletionsOptions()
 //{
 //    Messages =
@@ -31,35 +26,28 @@ var client = new ChatCompletionsClient(
 //        new ChatRequestSystemMessage(""),
 //        new ChatRequestUserMessage("Can you explain the basics of machine learning?"),
 //    },
-//    Model = "openai/gpt-4o-mini",
-//    Temperature = (float)0.5,
-//    MaxTokens = 4096,
+//    Model = "deepseek/DeepSeek-R1",    
+//    MaxTokens = 2048
 //};
 
 //Response<ChatCompletions> response = client.Complete(requestOptions);
 //System.Console.WriteLine(response.Value.Content);
-
 #endregion
 
 #region Chat app
-
-// Interactive chat using the openai/gpt-4o-mini model
+// Interactive chat application using the deepseek/DeepSeek-R1 model
 var chatOptions = new ChatCompletionsOptions()
 {
     Messages =
     {
         new ChatRequestSystemMessage("You are a helpful assistant. Respond concisely and clearly."),
     },
-    Model = "openai/gpt-4o-mini",
+    Model = "deepseek/DeepSeek-R1",
     Temperature = (float)0.5,
-    MaxTokens = 4096,
+    MaxTokens = 1024,
 };
 
-// Toggle to true to render the model response as a streaming output (simulated by printing characters incrementally).
-// Note: If your SDK provides a true streaming API, replace the simulated block with the SDK streaming call.
-bool useSimulatedStreaming = true;
-
-Console.WriteLine("gpt-4o-mini chat (type 'exit' to quit)");
+Console.WriteLine("DeepSeek-R1 chat (type 'exit' to quit)");
 
 while (true)
 {
@@ -88,35 +76,22 @@ while (true)
 
         Console.WriteLine();
         Console.WriteLine("Assistant:");
-
-        if (useSimulatedStreaming)
-        {
-            // print characters one by one to simulate streaming
-            foreach (var ch in assistantReply)
-            {
-                Console.Write(ch);
-                Thread.Sleep(8); // adjust delay to taste
-            }
-            Console.WriteLine();
-        }
-        else
-        {
-            Console.WriteLine(assistantReply);
-        }
-
+        Console.WriteLine(assistantReply);
         Console.WriteLine();
 
         // keep assistant reply in history so model has context
         chatOptions.Messages.Add(new ChatRequestAssistantMessage(assistantReply));
 
-        // truncate history if it grows too large
+        // Optionally truncate history if it grows too large
         if (chatOptions.Messages.Count > 30)
         {
-            var systemMessage = chatOptions.Messages.First();
+            // keep system message and last 20 messages
+            var systemMessage = chatOptions.Messages[0];
             var recent = chatOptions.Messages.Skip(Math.Max(1, chatOptions.Messages.Count - 21)).ToList();
             chatOptions.Messages.Clear();
             chatOptions.Messages.Add(systemMessage);
-            foreach (var m in recent) chatOptions.Messages.Add(m);
+            foreach (var m in recent)
+                chatOptions.Messages.Add(m);
         }
     }
     catch (Exception ex)
@@ -124,5 +99,4 @@ while (true)
         Console.WriteLine($"Error calling model: {ex.Message}");
     }
 }
-
 #endregion

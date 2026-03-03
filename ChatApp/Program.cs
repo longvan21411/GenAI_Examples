@@ -71,13 +71,12 @@ while (true)
 
     try
     {
-        //await foreach (ChatResponseUpdate item in client.GetStreamingResponseAsync(chatHistory, options: null, CancellationToken.None))
-        //{            
-        //    Console.Write(item.Text);
-        //    response += item.Text;
-        //}
-        var item = await client.GetResponseAsync(chatHistory);
-        Console.Write(item.Text);
+        await foreach (ChatResponseUpdate item in client.GetStreamingResponseAsync(chatHistory, options: null, CancellationToken.None))
+        {
+            Console.Write(item.Text);
+            response += item.Text;
+        }
+       
         Console.WriteLine();
         // Keep assistant reply in history for context
         chatHistory.Add(new ChatMessage(ChatRole.Assistant, response));
@@ -88,7 +87,6 @@ while (true)
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"\nError while streaming response: {ex.Message}");
-        // Optionally log ex.ToString() to output/log window
+        Console.WriteLine($"\nError while streaming response: {ex.Message}");        
     }
 }
