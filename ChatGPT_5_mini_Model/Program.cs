@@ -3,7 +3,6 @@ using ChatGPT_5_mini_Model.Model;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using OpenAI;
-using OpenAI.Chat;
 using System.ClientModel;
 
 // setup configuration to read API token from user secrets
@@ -13,7 +12,7 @@ IConfiguration config = new ConfigurationBuilder()
 
 var endpoint = new Uri("https://models.github.ai/inference");
 
-var token = config["GitHubModels:Token"];
+var token = config["GitHubAIModels:Token"];
 if (string.IsNullOrWhiteSpace(token))
 {
     throw new InvalidOperationException("API token 'GitHubModels:Token' is missing or empty.");
