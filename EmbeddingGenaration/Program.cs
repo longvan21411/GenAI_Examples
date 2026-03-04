@@ -27,7 +27,7 @@ var openAIOptions = new OpenAIClientOptions()
 
 // create an embedding generation client
 var openAiClient = new OpenAIClient(credential, openAIOptions);
-var embeddingGenerator = openAiClient.GetEmbeddingClient("text-embedding-3-small");
+var embeddingGenerator = openAiClient.GetEmbeddingClient("openai/text-embedding-3-small");
 
 #region Generate a single embedding
 //string[] textToEmbed = new[] { "Hello world!"};

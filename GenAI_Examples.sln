@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbeddingGenaration", "Embe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phi-4-mini_Model", "Phi-4-mini_Model\Phi-4-mini_Model.csproj", "{621F7615-D317-405F-95D5-43C788A1D38E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VectorSearch", "VectorSearch\VectorSearch.csproj", "{3BDCCA39-C9C7-4F0F-9DA7-3F6CBE14457F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{621F7615-D317-405F-95D5-43C788A1D38E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{621F7615-D317-405F-95D5-43C788A1D38E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{621F7615-D317-405F-95D5-43C788A1D38E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BDCCA39-C9C7-4F0F-9DA7-3F6CBE14457F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BDCCA39-C9C7-4F0F-9DA7-3F6CBE14457F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BDCCA39-C9C7-4F0F-9DA7-3F6CBE14457F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BDCCA39-C9C7-4F0F-9DA7-3F6CBE14457F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
