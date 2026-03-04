@@ -1,4 +1,4 @@
-# Prequisites
+﻿# Prequisites
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) or later
 - Install template: `dotnet new install Microsoft.Extensions.AI.Templates`
 
@@ -29,3 +29,9 @@ Configure your token for this project using .NET User Secrets:
 
 Learn more about [prototyping with AI models using GitHub Models](https://docs.github.com/github-models/prototyping-with-ai-models).
 
+# How it works
+[Documents] → [Chunking] → [Embeddings via GitHub Models]
+         ↓                           ↓
+     [Vector Store] ←——————— [Similarity Search]
+         ↓
+[Context + User Query] → [GitHub Model LLM] → Final 
