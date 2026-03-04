@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeepSeek-R1_Model", "DeepSe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meta-Llama-3.1_Model", "Meta-Llama-3.1_Model\Meta-Llama-3.1_Model.csproj", "{DA693A3A-1C16-41AB-AC29-C84290A24D51}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbeddingGenaration", "EmbeddingGenaration\EmbeddingGenaration.csproj", "{952C4234-6641-4B2F-ABF7-0111C08E13DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phi-4-mini_Model", "Phi-4-mini_Model\Phi-4-mini_Model.csproj", "{621F7615-D317-405F-95D5-43C788A1D38E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{DA693A3A-1C16-41AB-AC29-C84290A24D51}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA693A3A-1C16-41AB-AC29-C84290A24D51}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA693A3A-1C16-41AB-AC29-C84290A24D51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{952C4234-6641-4B2F-ABF7-0111C08E13DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{952C4234-6641-4B2F-ABF7-0111C08E13DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{952C4234-6641-4B2F-ABF7-0111C08E13DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{952C4234-6641-4B2F-ABF7-0111C08E13DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{621F7615-D317-405F-95D5-43C788A1D38E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{621F7615-D317-405F-95D5-43C788A1D38E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{621F7615-D317-405F-95D5-43C788A1D38E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{621F7615-D317-405F-95D5-43C788A1D38E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
