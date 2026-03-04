@@ -1,59 +1,86 @@
-﻿
-using Azure;
-using Azure.AI.Inference;
-using Azure.AI.OpenAI;
+﻿using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
+using OpenAI;
+using System;
+using System.ClientModel;
+using System.Numerics.Tensors;
 
 // setup configuration to read API token from user secrets
 IConfiguration config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
+
+var endpoint = new Uri("https://models.github.ai/inference");
+
 var token = config["GitHubAIModels:Token"];
 if (string.IsNullOrWhiteSpace(token))
 {
-    throw new InvalidOperationException("API token 'GitHubModels:Token' is missing or empty.");
+    throw new InvalidOperationException("API token 'GitHubAIModels:Token' is missing or empty.");
 }
-var credential = new AzureKeyCredential(token);
 
-var endpoint = new Uri("https://models.github.ai/inference");
-var openAi = new OpenAIClient(endpoint, new AzureKeyCredential(token));
+var credential = new ApiKeyCredential(token) ?? throw new InvalidOperationException("invalid token");
 
-
-#region Embedding generation
-
-string model = "gpt-4o-mini"; // model to use for embedding
-var words = new[] { "cat", "dog", "kitten", "puppy", "cow", "ox", "zebu" };
-Console.WriteLine($"Requesting embeddings from model: {model}");
-var resp = await openAi.GetEmbeddingsAsync(model, words);
-
-// Extract embeddings as float[] per input
-var embeddings = resp.Value.Data
-    .Select(d => d.Embedding.ToArray())
-    .ToArray();
-
-for (int i = 0; i < words.Length; i++)
+var openAIOptions = new OpenAIClientOptions()
 {
-    Console.WriteLine($"{words[i]} embedding length: {embeddings[i].Length}");
-    // preview first 8 dims
-    Console.WriteLine($"Preview: [{string.Join(", ", embeddings[i].Take(8))}...]");
-}
+    Endpoint = endpoint
+};
 
+// create an embedding generation client
+var openAiClient = new OpenAIClient(credential, openAIOptions);
+var embeddingGenerator = openAiClient.GetEmbeddingClient("text-embedding-3-small");
+
+#region Generate a single embedding
+//string[] textToEmbed = new[] { "Hello world!"};
+//var embeddingResponse = embeddingGenerator.GenerateEmbeddingsAsync(textToEmbed).Result;
+
+//if(embeddingResponse != null)
+//{
+//    for (int i = 0; i < embeddingResponse.Value.Count; i++)
+//    {        
+//        var vectorMemory = embeddingResponse.Value[i].ToFloats();
+//        foreach(var value in vectorMemory.Span)
+//        {
+//            Console.Write(value);
+//        }
+//        var vector = vectorMemory.ToArray();
+//        Console.WriteLine($"\n");
+//        Console.WriteLine($"Input: {textToEmbed[i]}, Embedding vector length: {vector.Length}");        
+//    }
+//}
 #endregion
 
-#region Calculate cosine similarity between two vectors
+#region Compare multiple embeddings using cosine similarity
 
-//if (embedding1 != null && embedding2 != null && embedding1.Length == embedding2.Length)
-//{
-//    var similarity = CosineSimilarity(embedding1, embedding2);
-//    Console.WriteLine($"Cosine similarity between inputs: {similarity:F6}");
-//}
-//else
-//{
-//    Console.WriteLine("Could not compute cosine similarity because embeddings are missing or have different lengths.");
-//}
+//var catEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "cat"}).Result;
+//var catVector = catEmbedding.Value[0].ToFloats().Span;
 
+//var kittenEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "kitten" }).Result;
+//var kittenVector = kittenEmbedding.Value[0].ToFloats().Span;
+
+//var dogEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "dog" }).Result;
+//var dogVector = dogEmbedding.Value[0].ToFloats().Span;
+
+//var puppyEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "puppy" }).Result;
+//var puppyVector = puppyEmbedding.Value[0].ToFloats().Span;
+
+//var lionEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "lion" }).Result;
+//var lionVector = lionEmbedding.Value[0].ToFloats().Span;
+
+//var elephantEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "elephant" }).Result;
+//var elephantVector = elephantEmbedding.Value[0].ToFloats().Span;
+
+//var sunEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "sun" }).Result;
+//var sunVector = sunEmbedding.Value[0].ToFloats().Span;
+
+//Console.WriteLine($"Cosine similarity between 'cat' and 'kitten': {TensorPrimitives.CosineSimilarity(catVector, kittenVector)}");
+//Console.WriteLine($"Cosine similarity between 'cat' and 'dog': {TensorPrimitives.CosineSimilarity(catVector, dogVector)}");
+//Console.WriteLine($"Cosine similarity between 'cat' and 'puppy': {TensorPrimitives.CosineSimilarity(catVector, puppyVector)}");
+//Console.WriteLine($"Cosine similarity between 'dog' and 'puppy': {TensorPrimitives.CosineSimilarity(dogVector, puppyVector)}");
+
+//Console.WriteLine($"Cosine similarity between 'cat' and 'lion': {TensorPrimitives.CosineSimilarity(catVector, lionVector)}");
+//Console.WriteLine($"Cosine similarity between 'lion' and 'elephant': {TensorPrimitives.CosineSimilarity(lionVector, elephantVector)}");
+//Console.WriteLine($"Cosine similarity between 'elephant' and 'sun': {TensorPrimitives.CosineSimilarity(elephantVector, sunVector)}");
 #endregion
+
+
+
