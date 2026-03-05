@@ -5,9 +5,35 @@ using ChatApp_RAG.Components;
 using ChatApp_RAG.Services;
 using ChatApp_RAG.Services.Ingestion;
 using Microsoft.Extensions.DataIngestion;
+using Serilog;
+using Serilog.Events;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+
+// Include user secrets in the application's configuration so Serilog (and other components) can read them.
+builder.Configuration.AddUserSecrets<Program>();
+
+// Configure Serilog from configuration and default sinks
+var logsDirectory = Path.Combine(AppContext.BaseDirectory, "Logs");
+Directory.CreateDirectory(logsDirectory);
+var logFilePath = Path.Combine(logsDirectory, "log-.log");
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    // Write rolling daily logs to Logs/log-YYYYMMDD.log, keep 14 files
+    .WriteTo.File(
+        path: logFilePath,
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 14,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+    )
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 IConfiguration config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
@@ -39,22 +65,44 @@ builder.Services.AddKeyedSingleton("ingestion_directory", new DirectoryInfo(Path
 builder.Services.AddChatClient(chatClient).UseFunctionInvocation().UseLogging();
 builder.Services.AddEmbeddingGenerator(embeddingGenerator);
 
-var app = builder.Build();
+builder.Services.AddAntiforgery(options =>
+{    
+    options.HeaderName = "X-CSRF-TOKEN";
+});
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+builder.Services.AddRazorComponents()
+                .AddInteractiveServerComponents();
+
+// Use a try/catch to log startup exceptions and ensure Serilog flushes on exit.
+try
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    var app = builder.Build();
+
+    // Configure the HTTP request pipeline.
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseExceptionHandler("/Error", createScopeForErrors: true);
+        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        app.UseHsts();
+    }
+
+    app.UseHttpsRedirection();
+    app.UseAntiforgery();
+
+    app.UseStaticFiles();
+    app.MapRazorComponents<App>()
+        .AddInteractiveServerRenderMode();
+
+    Log.Information("Starting web host");
+
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-app.UseAntiforgery();
-
-app.UseStaticFiles();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
-
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Host terminated unexpectedly");
+    throw;
+}
+finally
+{
+    Log.CloseAndFlush();
+}

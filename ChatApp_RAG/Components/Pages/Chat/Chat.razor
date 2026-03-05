@@ -3,6 +3,7 @@
 @inject IChatClient ChatClient
 @inject NavigationManager Nav
 @inject SemanticSearch Search
+@inject ILogger<Chat> Logger
 @implements IDisposable
 
 <PageTitle>Chat</PageTitle>
@@ -13,7 +14,7 @@
     <NoMessagesContent>
         <div>To get started, try asking about these example documents. You can replace these with your own data and replace this message.</div>
         <ChatCitation File="Example_Emergency_Survival_Kit.pdf"/>
-        <ChatCitation File="Example_GPS_Watch.md"/>
+        <ChatCitation File="Example_GPS_Watch.md"/>        
     </NoMessagesContent>
 </ChatMessageList>
 
@@ -69,16 +70,53 @@
         chatSuggestions?.Clear();
         await chatInput!.FocusAsync();
 
+        // Log the outgoing user message and basic conversation state
+        try
+        {
+            Logger.LogInformation("Sending user message to LLM. ConversationId={ConversationId}, MessageCount={MessageCount}, UserMessage={UserMessage}",
+                chatOptions.ConversationId, messages.Count, userMessage.Text);
+        }
+        catch
+        {
+            // Swallow logging exceptions to avoid crashing the component
+        }
+
         // Stream and display a new response from the IChatClient
         var responseText = new TextContent("");
         currentResponseMessage = new ChatMessage(ChatRole.Assistant, [responseText]);
         currentResponseCancellation = new();
-        await foreach (var update in ChatClient.GetStreamingResponseAsync(messages.Skip(statefulMessageCount), chatOptions, currentResponseCancellation.Token))
+
+        try
         {
-            messages.AddMessages(update, filter: c => c is not TextContent);
-            responseText.Text += update.Text;
-            chatOptions.ConversationId = update.ConversationId;
-            ChatMessageItem.NotifyChanged(currentResponseMessage);
+            await foreach (var update in ChatClient.GetStreamingResponseAsync(messages.Skip(statefulMessageCount), chatOptions, currentResponseCancellation.Token))
+            {
+                messages.AddMessages(update, filter: c => c is not TextContent);
+                responseText.Text += update.Text;
+                chatOptions.ConversationId = update.ConversationId;
+                ChatMessageItem.NotifyChanged(currentResponseMessage);
+            }
+
+            // Log successful completion
+            try
+            {
+                Logger.LogInformation("Completed receiving response from LLM. ConversationId={ConversationId}, FinalMessageCount={MessageCount}",
+                    chatOptions.ConversationId, messages.Count + 1);
+            }
+            catch
+            {
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Request was cancelled - not an error
+            Logger.LogInformation("LLM response streaming cancelled. ConversationId={ConversationId}", chatOptions.ConversationId);
+        }
+        catch (Exception ex)
+        {
+            // Log unexpected errors
+            Logger.LogError(ex, "Error while streaming response from LLM. ConversationId={ConversationId}", chatOptions.ConversationId);
+            await InvokeAsync(StateHasChanged);
+            throw;
         }
 
         // Store the final response in the conversation, and begin getting suggestions

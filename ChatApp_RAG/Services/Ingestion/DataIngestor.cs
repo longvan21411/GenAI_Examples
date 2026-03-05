@@ -3,6 +3,7 @@ using Microsoft.Extensions.DataIngestion;
 using Microsoft.Extensions.DataIngestion.Chunkers;
 using Microsoft.Extensions.VectorData;
 using Microsoft.ML.Tokenizers;
+using Microsoft.Extensions.Logging;
 
 namespace ChatApp_RAG.Services.Ingestion;
 
@@ -21,9 +22,17 @@ public class DataIngestor(
             IncrementalIngestion = false,
         });
 
+        // Create tokenizer and chunker so we can log their configuration
+        var tokenizerModel = "gpt-4o";
+        var tokenizer = TiktokenTokenizer.CreateForModel(tokenizerModel);
+        var chunker = new SemanticSimilarityChunker(embeddingGenerator, new(tokenizer));
+
+        logger.LogInformation("Initializing ingestion pipeline. ChunkerType={ChunkerType}, TokenizerModel={TokenizerModel}",
+            chunker.GetType().FullName, tokenizerModel);
+
         using var pipeline = new IngestionPipeline<string>(
             reader: new DocumentReader(directory),
-            chunker: new SemanticSimilarityChunker(embeddingGenerator, new(TiktokenTokenizer.CreateForModel("gpt-4o"))),
+            chunker: chunker,
             writer: writer,
             loggerFactory: loggerFactory);
 

@@ -15,6 +15,9 @@
     <PackageReference Include="PdfPig" Version="0.1.12" />
     <PackageReference Include="Microsoft.ML.Tokenizers.Data.Cl100kBase" Version="1.0.1" />
     <PackageReference Include="Microsoft.ML.Tokenizers.Data.O200kBase" Version="1.0.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageReference Include="System.Linq.AsyncEnumerable" Version="10.0.0" />
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.SqliteVec" Version="1.67.1-preview" />
   </ItemGroup>
