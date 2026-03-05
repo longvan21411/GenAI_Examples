@@ -55,9 +55,12 @@
     {
         statefulMessageCount = 0;
         messages.Add(new(ChatRole.System, SystemPrompt));
+
+        // ChatApp RAG will focus on main three functions
         chatOptions.Tools = [
             AIFunctionFactory.Create(LoadDocumentsAsync),
-            AIFunctionFactory.Create(SearchAsync)
+            AIFunctionFactory.Create(SearchAsync),
+            AIFunctionFactory.Create(GetTemperature)
         ];
     }
 
@@ -165,6 +168,19 @@
         var results = await Search.SearchAsync(searchPhrase, filenameFilter, maxResults: 5);
         return results.Select(result =>
             $"<result filename=\"{result.DocumentId}\">{result.Text}</result>");
+    }
+
+    // Implement extending RAG functionality with function-calling tool
+    [Description("Get current temperature of weather")]
+    private async Task<float?> GetTemperature(
+        [Description("The phrase to search for.")] string location)
+
+    {
+        
+        await Task.Delay(500);
+        var temperature = new Random().Next(-10, 40);
+        Logger.LogInformation("GetTemperature(): location = " + location + ", temperature = " + temperature);
+        return temperature;
     }
 
     public void Dispose()
