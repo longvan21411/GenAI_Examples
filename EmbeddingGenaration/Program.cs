@@ -30,23 +30,23 @@ var openAiClient = new OpenAIClient(credential, openAIOptions);
 var embeddingGenerator = openAiClient.GetEmbeddingClient("openai/text-embedding-3-small");
 
 #region Generate a single embedding
-//string[] textToEmbed = new[] { "Hello world!"};
-//var embeddingResponse = embeddingGenerator.GenerateEmbeddingsAsync(textToEmbed).Result;
+string[] textToEmbed = new[] { "Hello world!" };
+var embeddingResponse = embeddingGenerator.GenerateEmbeddingsAsync(textToEmbed).Result;
 
-//if(embeddingResponse != null)
-//{
-//    for (int i = 0; i < embeddingResponse.Value.Count; i++)
-//    {        
-//        var vectorMemory = embeddingResponse.Value[i].ToFloats();
-//        foreach(var value in vectorMemory.Span)
-//        {
-//            Console.Write(value);
-//        }
-//        var vector = vectorMemory.ToArray();
-//        Console.WriteLine($"\n");
-//        Console.WriteLine($"Input: {textToEmbed[i]}, Embedding vector length: {vector.Length}");        
-//    }
-//}
+if (embeddingResponse != null)
+{
+    for (int i = 0; i < embeddingResponse.Value.Count; i++)
+    {
+        var vectorMemory = embeddingResponse.Value[i].ToFloats();
+        foreach (var value in vectorMemory.Span)
+        {
+            Console.Write(value);
+        }
+        var vector = vectorMemory.ToArray();
+        Console.WriteLine($"\n");
+        Console.WriteLine($"Input: {textToEmbed[i]}, Embedding vector length: {vector.Length}");
+    }
+}
 #endregion
 
 #region Compare multiple embeddings using cosine similarity

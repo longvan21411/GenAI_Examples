@@ -4,6 +4,7 @@
 @inject NavigationManager Nav
 @inject SemanticSearch Search
 @inject ILogger<Chat> Logger
+@inject ChatApp_RAG.Services.QdrantChatStore QdrantStore
 @implements IDisposable
 
 <PageTitle>Chat</PageTitle>
@@ -73,6 +74,16 @@
         chatSuggestions?.Clear();
         await chatInput!.FocusAsync();
 
+        // Persist the user message to Qdrant
+        try
+        {
+            await QdrantStore.UpsertMessageAsync(Guid.NewGuid(), userMessage.Text ?? string.Empty, "user");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to persist user message to Qdrant");
+        }
+
         // Log the outgoing user message and basic conversation state
         try
         {
@@ -124,6 +135,17 @@
 
         // Store the final response in the conversation, and begin getting suggestions
         messages.Add(currentResponseMessage!);
+
+        // Persist assistant message
+        try
+        {
+            await QdrantStore.UpsertMessageAsync(Guid.NewGuid(), responseText.Text, "assistant");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to persist assistant message to Qdrant");
+        }
+
         statefulMessageCount = chatOptions.ConversationId is not null ? messages.Count : 0;
         currentResponseMessage = null;
         chatSuggestions?.Update(messages);

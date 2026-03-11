@@ -1,4 +1,3 @@
-using System.ClientModel;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using ChatApp_RAG.Components;
@@ -8,6 +7,7 @@ using Microsoft.Extensions.DataIngestion;
 using Serilog;
 using Serilog.Events;
 using System.IO;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,10 +41,10 @@ IConfiguration config = new ConfigurationBuilder()
 var token = config["GitHubAIModels:Token"];
 if (string.IsNullOrWhiteSpace(token))
 {
-    throw new InvalidOperationException("API token 'GitHubModels:Token' is missing or empty.");
+    throw new InvalidOperationException("API token 'GitHubAIModels:Token' is missing or empty.");
 }
 
-var credential = new ApiKeyCredential(token);
+var credential = new System.ClientModel.ApiKeyCredential(token);
 var openAIOptions = new OpenAIClientOptions()
 {
     Endpoint = new Uri("https://models.inference.ai.azure.com")
@@ -52,7 +52,10 @@ var openAIOptions = new OpenAIClientOptions()
 
 var ghModelsClient = new OpenAIClient(credential, openAIOptions);
 var chatClient = ghModelsClient.GetChatClient("gpt-4o-mini").AsIChatClient();
-var embeddingGenerator = ghModelsClient.GetEmbeddingClient("text-embedding-3-small").AsIEmbeddingGenerator();
+
+// Get the raw embedding client and also the typed IEmbeddingGenerator for DI consumers
+var rawEmbeddingClient = ghModelsClient.GetEmbeddingClient("text-embedding-3-small");
+var embeddingGenerator = rawEmbeddingClient.AsIEmbeddingGenerator();
 
 var vectorStorePath = Path.Combine(AppContext.BaseDirectory, "vector-store.db");
 var vectorStoreConnectionString = $"Data Source={vectorStorePath}";
@@ -65,8 +68,24 @@ builder.Services.AddKeyedSingleton("ingestion_directory", new DirectoryInfo(Path
 builder.Services.AddChatClient(chatClient).UseFunctionInvocation().UseLogging();
 builder.Services.AddEmbeddingGenerator(embeddingGenerator);
 
+// Register EmbeddingService with the raw client so it can call GenerateEmbeddingsAsync like EmbeddingGenaration project
+builder.Services.AddSingleton(sp => new EmbeddingService(rawEmbeddingClient));
+
+// Register Qdrant chat store and HttpClient. QDRANT_BASE_URL should be set in configuration (e.g. user secrets) to http://localhost:6333
+var qdrantBase = builder.Configuration["Qdrant:BaseUrl"] ?? "http://localhost:6333";
+if (!qdrantBase.EndsWith("/"))
+{
+    qdrantBase += "/";
+}
+
+// Ensure the QdrantChatStore constructor receives HttpClient and the embedding func
+builder.Services.AddHttpClient<QdrantChatStore>(client =>
+{
+    client.BaseAddress = new Uri(qdrantBase);
+});
+
 builder.Services.AddAntiforgery(options =>
-{    
+{
     options.HeaderName = "X-CSRF-TOKEN";
 });
 
@@ -77,6 +96,13 @@ builder.Services.AddRazorComponents()
 try
 {
     var app = builder.Build();
+
+    // Ensure Qdrant collection exists on startup
+    using (var scope = app.Services.CreateScope())
+    {
+        var qdrant = scope.ServiceProvider.GetRequiredService<QdrantChatStore>();
+        await qdrant.EnsureCollectionExistsAsync();
+    }
 
     // Configure the HTTP request pipeline.
     if (!app.Environment.IsDevelopment())

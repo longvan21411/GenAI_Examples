@@ -22,4 +22,8 @@
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.SqliteVec" Version="1.67.1-preview" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Lib\" />
+  </ItemGroup>
+
 </Project>
