@@ -279,8 +279,6 @@ var client = new QdrantClient("localhost", 6334);
 //}
 #endregion
 
-#region Upsert a point through QdrantClient with vector data call from `text-embedding-3-small` model
-
 IConfiguration config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
@@ -300,101 +298,200 @@ var openAIOptions = new OpenAIClientOptions()
 var openAiClient = new OpenAIClient(credential, openAIOptions);
 var embeddingGenerator = openAiClient.GetEmbeddingClient("openai/text-embedding-3-small");
 
-var points = new List<PointStruct>();
-var catEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "cat" }).Result;
-var catVector = catEmbedding.Value[0].ToFloats().Span;
-var catPoint = new PointStruct { Id = 1, Vectors = catVector.ToArray() };
-catPoint.Payload["animal"] = "cat";
-points.Add(catPoint);
+#region Upsert a point through QdrantClient with vector data call from `text-embedding-3-small` model
 
-var kittenEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "kitten" }).Result;
-var kittenVector = kittenEmbedding.Value[0].ToFloats().Span;
-var kittenPoint = new PointStruct { Id = 2, Vectors = kittenVector.ToArray() };
-kittenPoint.Payload["animal"] = "kitten";
-points.Add(kittenPoint);
+//var points = new List<PointStruct>();
+//var catEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "cat" }).Result;
+//var catVector = catEmbedding.Value[0].ToFloats().Span;
+//var catPoint = new PointStruct { Id = 1, Vectors = catVector.ToArray() };
+//catPoint.Payload["animal"] = "cat";
+//points.Add(catPoint);
 
-var dogEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "dog" }).Result;
-var dogVector = dogEmbedding.Value[0].ToFloats().Span;
-var dogPoint = new PointStruct { Id = 3, Vectors = dogVector.ToArray() };
-dogPoint.Payload["animal"] = "dog";
-points.Add(dogPoint);
+//var kittenEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "kitten" }).Result;
+//var kittenVector = kittenEmbedding.Value[0].ToFloats().Span;
+//var kittenPoint = new PointStruct { Id = 2, Vectors = kittenVector.ToArray() };
+//kittenPoint.Payload["animal"] = "kitten";
+//points.Add(kittenPoint);
 
-var puppyEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "puppy" }).Result;
-var puppyVector = puppyEmbedding.Value[0].ToFloats().Span;
-var puppyPoint = new PointStruct { Id = 4, Vectors = puppyVector.ToArray() };
-puppyPoint.Payload["animal"] = "puppy";
-points.Add(puppyPoint);
+//var dogEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "dog" }).Result;
+//var dogVector = dogEmbedding.Value[0].ToFloats().Span;
+//var dogPoint = new PointStruct { Id = 3, Vectors = dogVector.ToArray() };
+//dogPoint.Payload["animal"] = "dog";
+//points.Add(dogPoint);
 
-var lionEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "lion" }).Result;
-var lionVector = lionEmbedding.Value[0].ToFloats().Span;
-var lionPoint = new PointStruct { Id = 5, Vectors = lionVector.ToArray() };
-lionPoint.Payload["animal"] = "lion";
-points.Add(lionPoint);
+//var puppyEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "puppy" }).Result;
+//var puppyVector = puppyEmbedding.Value[0].ToFloats().Span;
+//var puppyPoint = new PointStruct { Id = 4, Vectors = puppyVector.ToArray() };
+//puppyPoint.Payload["animal"] = "puppy";
+//points.Add(puppyPoint);
 
-var elephantEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "elephant" }).Result;
-var elephantVector = elephantEmbedding.Value[0].ToFloats().Span;
-var elephantPoint = new PointStruct { Id = 6, Vectors = elephantVector.ToArray() };
-elephantPoint.Payload["animal"] = "elephant";
-points.Add(elephantPoint);
+//var lionEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "lion" }).Result;
+//var lionVector = lionEmbedding.Value[0].ToFloats().Span;
+//var lionPoint = new PointStruct { Id = 5, Vectors = lionVector.ToArray() };
+//lionPoint.Payload["animal"] = "lion";
+//points.Add(lionPoint);
 
-var leopardEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "leopard" }).Result;
-var leopardVector = leopardEmbedding.Value[0].ToFloats().Span;
-var leopardPoint = new PointStruct { Id = 7, Vectors = leopardVector.ToArray() };
-leopardPoint.Payload["animal"] = "leopard";
-points.Add(leopardPoint);
+//var elephantEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "elephant" }).Result;
+//var elephantVector = elephantEmbedding.Value[0].ToFloats().Span;
+//var elephantPoint = new PointStruct { Id = 6, Vectors = elephantVector.ToArray() };
+//elephantPoint.Payload["animal"] = "elephant";
+//points.Add(elephantPoint);
 
-var tigerEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "tiger" }).Result;
-var tigerVector = tigerEmbedding.Value[0].ToFloats().Span;
-var tigerPoint = new PointStruct { Id = 8, Vectors = tigerVector.ToArray() };
-tigerPoint.Payload["animal"] = "tiger";
-points.Add(tigerPoint);
+//var leopardEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "leopard" }).Result;
+//var leopardVector = leopardEmbedding.Value[0].ToFloats().Span;
+//var leopardPoint = new PointStruct { Id = 7, Vectors = leopardVector.ToArray() };
+//leopardPoint.Payload["animal"] = "leopard";
+//points.Add(leopardPoint);
 
-var caracalEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "caracal" }).Result;
-var caracalVector = caracalEmbedding.Value[0].ToFloats().Span;
-var caracalPoint = new PointStruct { Id = 9, Vectors = caracalVector.ToArray() };
-caracalPoint.Payload["animal"] = "caracal";
-points.Add(caracalPoint);
+//var tigerEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "tiger" }).Result;
+//var tigerVector = tigerEmbedding.Value[0].ToFloats().Span;
+//var tigerPoint = new PointStruct { Id = 8, Vectors = tigerVector.ToArray() };
+//tigerPoint.Payload["animal"] = "tiger";
+//points.Add(tigerPoint);
 
-var jaguarEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "jaguar" }).Result;
-var jaguarVector = jaguarEmbedding.Value[0].ToFloats().Span;
-var jaguarPoint = new PointStruct { Id = 10, Vectors = jaguarVector.ToArray() };
-jaguarPoint.Payload["animal"] = "jaguar";
-points.Add(jaguarPoint);
+//var caracalEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "caracal" }).Result;
+//var caracalVector = caracalEmbedding.Value[0].ToFloats().Span;
+//var caracalPoint = new PointStruct { Id = 9, Vectors = caracalVector.ToArray() };
+//caracalPoint.Payload["animal"] = "caracal";
+//points.Add(caracalPoint);
 
-var cheetahEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "cheetah" }).Result;
-var cheetahVector = cheetahEmbedding.Value[0].ToFloats().Span;
-var cheetahPoint = new PointStruct { Id = 11, Vectors = cheetahVector.ToArray() };
-cheetahPoint.Payload["animal"] = "cheetah";
-points.Add(cheetahPoint);
+//var jaguarEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "jaguar" }).Result;
+//var jaguarVector = jaguarEmbedding.Value[0].ToFloats().Span;
+//var jaguarPoint = new PointStruct { Id = 10, Vectors = jaguarVector.ToArray() };
+//jaguarPoint.Payload["animal"] = "jaguar";
+//points.Add(jaguarPoint);
 
-var pumaEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "puma" }).Result;
-var pumaVector = pumaEmbedding.Value[0].ToFloats().Span;
-var pumaPoint = new PointStruct { Id = 12, Vectors = pumaVector.ToArray() };
-pumaPoint.Payload["animal"] = "puma";
-points.Add(pumaPoint);
+//var cheetahEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "cheetah" }).Result;
+//var cheetahVector = cheetahEmbedding.Value[0].ToFloats().Span;
+//var cheetahPoint = new PointStruct { Id = 11, Vectors = cheetahVector.ToArray() };
+//cheetahPoint.Payload["animal"] = "cheetah";
+//points.Add(cheetahPoint);
 
-var hippoEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "hippo" }).Result;
-var hipoVector = hippoEmbedding.Value[0].ToFloats().Span;
-var hipoPoint = new PointStruct { Id = 13, Vectors = hipoVector.ToArray() };
-hipoPoint.Payload["animal"] = "hippo";
-points.Add(hipoPoint);
+//var pumaEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "puma" }).Result;
+//var pumaVector = pumaEmbedding.Value[0].ToFloats().Span;
+//var pumaPoint = new PointStruct { Id = 12, Vectors = pumaVector.ToArray() };
+//pumaPoint.Payload["animal"] = "puma";
+//points.Add(pumaPoint);
 
-var bearEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "bear" }).Result;
-var bearVector = bearEmbedding.Value[0].ToFloats().Span;
-var bearPoint = new PointStruct { Id = 14, Vectors = hipoVector.ToArray() };
-bearPoint.Payload["animal"] = "bear";
-points.Add(bearPoint);
+//var hippoEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "hippo" }).Result;
+//var hipoVector = hippoEmbedding.Value[0].ToFloats().Span;
+//var hipoPoint = new PointStruct { Id = 13, Vectors = hipoVector.ToArray() };
+//hipoPoint.Payload["animal"] = "hippo";
+//points.Add(hipoPoint);
 
-try
-{
-    await client.UpsertAsync(collectionName: "RAG_01", points: points);
-    Log.Information("Finished upserting points to Qdrant with vector size = 1536");
-}
-catch (Exception ex)
-{
-    Log.Error(ex, "Error upserting points to Qdrant");
-}
+//var bearEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "bear" }).Result;
+//var bearVector = bearEmbedding.Value[0].ToFloats().Span;
+//var bearPoint = new PointStruct { Id = 14, Vectors = hipoVector.ToArray() };
+//bearPoint.Payload["animal"] = "bear";
+//points.Add(bearPoint);
+
+//try
+//{
+//    await client.UpsertAsync(collectionName: "RAG_01", points: points);
+//    Log.Information("Finished upserting points to Qdrant with vector size = 1536");
+//}
+//catch (Exception ex)
+//{
+//    Log.Error(ex, "Error upserting points to Qdrant");
+//}
 
 #endregion
 
+#region Upsert a solar system point through QdrantClient with vector data call from `text-embedding-3-small` model
+//var points = new List<PointStruct>();
 
+//var solarEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "sun" }).Result;
+//var solarVector = solarEmbedding.Value[0].ToFloats().Span;
+//var solarPoint = new PointStruct { Id = 15, Vectors = solarVector.ToArray() };
+//solarPoint.Payload["solar"] = "sun";
+//points.Add(solarPoint);
+
+//var moonEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "moon" }).Result;
+//var moonVector = moonEmbedding.Value[0].ToFloats().Span;
+//var moonPoint = new PointStruct { Id = 16, Vectors = moonVector.ToArray() };
+//moonPoint.Payload["solar"] = "moon";
+//points.Add(moonPoint);
+
+//var earthEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "earth" }).Result;
+//var earthVector = earthEmbedding.Value[0].ToFloats().Span;
+//var earthPoint = new PointStruct { Id = 17, Vectors = earthVector.ToArray() };
+//earthPoint.Payload["solar"] = "earth";
+//points.Add(earthPoint);
+
+//var marsEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "mars" }).Result;
+//var marsVector = marsEmbedding.Value[0].ToFloats().Span;
+//var marsPoint = new PointStruct { Id = 18, Vectors = marsVector.ToArray() };
+//marsPoint.Payload["solar"] = "mars";
+//points.Add(marsPoint);
+
+//var venusEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "venus" }).Result;
+//var venusVector = venusEmbedding.Value[0].ToFloats().Span;
+//var venusPoint = new PointStruct { Id = 19, Vectors = venusVector.ToArray() };
+//venusPoint.Payload["solar"] = "venus";
+//points.Add(venusPoint);
+
+//var jupiterEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "jupiter" }).Result;
+//var jupiterVector = jupiterEmbedding.Value[0].ToFloats().Span;
+//var jupiterPoint = new PointStruct { Id = 20, Vectors = jupiterVector.ToArray() };
+//jupiterPoint.Payload["solar"] = "jupiter";
+//points.Add(jupiterPoint);
+
+//var saturnEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "saturn" }).Result;
+//var saturnVector = saturnEmbedding.Value[0].ToFloats().Span;
+//var saturnPoint = new PointStruct { Id = 21, Vectors = saturnVector.ToArray() };
+//saturnPoint.Payload["solar"] = "saturn";
+//points.Add(saturnPoint);
+
+//var uranusEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "uranus" }).Result;
+//var uranusVector = uranusEmbedding.Value[0].ToFloats().Span;
+//var uranusPoint = new PointStruct { Id = 22, Vectors = uranusVector.ToArray() };
+//uranusPoint.Payload["solar"] = "uranus";
+//points.Add(uranusPoint);
+
+//var neptuneEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "neptune" }).Result;
+//var neptuneVector = neptuneEmbedding.Value[0].ToFloats().Span;
+//var neptunePoint = new PointStruct { Id = 23, Vectors = neptuneVector.ToArray() };
+//neptunePoint.Payload["solar"] = "neptune";
+//points.Add(neptunePoint);
+
+//var plutoEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "pluto" }).Result;
+//var plutoVector = plutoEmbedding.Value[0].ToFloats().Span;
+//var plutoPoint = new PointStruct { Id = 24, Vectors = plutoVector.ToArray() };
+//plutoPoint.Payload["solar"] = "pluto";
+//points.Add(plutoPoint);
+
+//try
+//{
+//    await client.UpsertAsync(collectionName: "RAG_01", points: points);
+//    Log.Information("Finished upserting solar system point to Qdrant with vector size = 1536");
+//}
+//catch (Exception ex)
+//{
+//    Log.Error(ex, "Error upserting solar system point to Qdrant");
+//}
+#endregion
+
+#region Search for similar points using the QdrantClient and print results
+//try
+//{
+//    var queryEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "sun" }).Result;
+//    var queryVector = queryEmbedding.Value[0].ToFloats().Span;
+//    var results = await client.SearchAsync(collectionName: "RAG_01",
+//        vector: queryVector.ToArray(),
+//        limit: 10
+//        );
+//    foreach (var item in results)
+//    {
+//        string solar = "(none)";
+//        if (item.Payload != null && item.Payload.TryGetValue("solar", out var animalObj))
+//        {
+//            solar = animalObj?.ToString() ?? "(null)";
+//        }
+//        Log.Information("Point Id={Id} Solar={solar}", item.Id, solar);
+//    }
+//}
+//catch (Exception ex)
+//{
+//    Log.Error(ex, "Error searching points in Qdrant using QdrantClient");
+//}
+#endregion
