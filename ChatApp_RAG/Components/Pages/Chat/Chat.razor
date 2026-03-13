@@ -4,7 +4,6 @@
 @inject NavigationManager Nav
 @inject SemanticSearch Search
 @inject ILogger<Chat> Logger
-@inject ChatApp_RAG.Services.QdrantChatStore QdrantStore
 @implements IDisposable
 
 <PageTitle>Chat</PageTitle>
@@ -28,7 +27,7 @@
 @code {
     private const string SystemPrompt = @"
         You are an assistant who answers questions about information you retrieve.
-        Do not answer questions about anything else.
+        Answer any question if relevant documents exist.
         Use only simple markdown to format your responses.
 
         Use the LoadDocuments tool to prepare for searches before answering any questions.
@@ -42,6 +41,7 @@
 
         The quote must be max 5 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
         Don't refer to the presence of citations; just emit these tags right at the end, with no surrounding text.
+        Case the relevant is not existed in the retrieved documents, you can directly answer the question without citing.
         ";
 
     private int statefulMessageCount;
@@ -74,21 +74,28 @@
         chatSuggestions?.Clear();
         await chatInput!.FocusAsync();
 
-        // Persist the user message to Qdrant
+        // Determine whether the question is related to ingested documents.
+        bool hasRelatedDocs = false;
         try
         {
-            await QdrantStore.UpsertMessageAsync(Guid.NewGuid(), userMessage.Text ?? string.Empty, "user");
+            hasRelatedDocs = await Search.HasRelevantDocumentsAsync(userMessage.Text ?? string.Empty, documentIdFilter: null);
+            Logger.LogInformation("HasRelatedDocs={HasRelatedDocs} for user message.", hasRelatedDocs);
         }
         catch (Exception ex)
         {
-            Logger.LogWarning(ex, "Failed to persist user message to Qdrant");
+            Logger.LogWarning(ex, "Failed to check for related documents; defaulting to sending question to model directly.");
+            // on failure, fall back to direct model query
+            hasRelatedDocs = false;
         }
+
+        // Choose options for this request. If no relevant docs, remove the retrieval tools so the model answers directly.
+        var optionsForThisRequest = hasRelatedDocs ? chatOptions : new ChatOptions { ConversationId = chatOptions.ConversationId };
 
         // Log the outgoing user message and basic conversation state
         try
         {
-            Logger.LogInformation("Sending user message to LLM. ConversationId={ConversationId}, MessageCount={MessageCount}, UserMessage={UserMessage}",
-                chatOptions.ConversationId, messages.Count, userMessage.Text);
+            Logger.LogInformation("Sending user message to LLM. ConversationId={ConversationId}, MessageCount={MessageCount}, UserMessage={UserMessage}, UseRAG={UseRAG}",
+                optionsForThisRequest.ConversationId, messages.Count, userMessage.Text, hasRelatedDocs);
         }
         catch
         {
@@ -102,7 +109,7 @@
 
         try
         {
-            await foreach (var update in ChatClient.GetStreamingResponseAsync(messages.Skip(statefulMessageCount), chatOptions, currentResponseCancellation.Token))
+            await foreach (var update in ChatClient.GetStreamingResponseAsync(messages.Skip(statefulMessageCount), optionsForThisRequest, currentResponseCancellation.Token))
             {
                 messages.AddMessages(update, filter: c => c is not TextContent);
                 responseText.Text += update.Text;
@@ -135,16 +142,6 @@
 
         // Store the final response in the conversation, and begin getting suggestions
         messages.Add(currentResponseMessage!);
-
-        // Persist assistant message
-        try
-        {
-            await QdrantStore.UpsertMessageAsync(Guid.NewGuid(), responseText.Text, "assistant");
-        }
-        catch (Exception ex)
-        {
-            Logger.LogWarning(ex, "Failed to persist assistant message to Qdrant");
-        }
 
         statefulMessageCount = chatOptions.ConversationId is not null ? messages.Count : 0;
         currentResponseMessage = null;

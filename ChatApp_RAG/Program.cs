@@ -71,19 +71,6 @@ builder.Services.AddEmbeddingGenerator(embeddingGenerator);
 // Register EmbeddingService with the raw client so it can call GenerateEmbeddingsAsync like EmbeddingGenaration project
 builder.Services.AddSingleton(sp => new EmbeddingService(rawEmbeddingClient));
 
-// Register Qdrant chat store and HttpClient. QDRANT_BASE_URL should be set in configuration (e.g. user secrets) to http://localhost:6333
-var qdrantBase = builder.Configuration["Qdrant:BaseUrl"] ?? "http://localhost:6333";
-if (!qdrantBase.EndsWith("/"))
-{
-    qdrantBase += "/";
-}
-
-// Ensure the QdrantChatStore constructor receives HttpClient and the embedding func
-builder.Services.AddHttpClient<QdrantChatStore>(client =>
-{
-    client.BaseAddress = new Uri(qdrantBase);
-});
-
 builder.Services.AddAntiforgery(options =>
 {
     options.HeaderName = "X-CSRF-TOKEN";
@@ -96,13 +83,6 @@ builder.Services.AddRazorComponents()
 try
 {
     var app = builder.Build();
-
-    // Ensure Qdrant collection exists on startup
-    using (var scope = app.Services.CreateScope())
-    {
-        var qdrant = scope.ServiceProvider.GetRequiredService<QdrantChatStore>();
-        await qdrant.EnsureCollectionExistsAsync();
-    }
 
     // Configure the HTTP request pipeline.
     if (!app.Environment.IsDevelopment())
