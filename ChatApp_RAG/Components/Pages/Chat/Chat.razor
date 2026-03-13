@@ -107,6 +107,9 @@
         currentResponseMessage = new ChatMessage(ChatRole.Assistant, [responseText]);
         currentResponseCancellation = new();
 
+        // Show waiting mask and disable send while streaming
+        chatInput?.SetWaiting(true);
+
         try
         {
             await foreach (var update in ChatClient.GetStreamingResponseAsync(messages.Skip(statefulMessageCount), optionsForThisRequest, currentResponseCancellation.Token))
@@ -116,6 +119,9 @@
                 chatOptions.ConversationId = update.ConversationId;
                 ChatMessageItem.NotifyChanged(currentResponseMessage);
             }
+
+            // Streaming finished successfully — unmask input so user can send more
+            chatInput?.SetWaiting(false);
 
             // Log successful completion
             try
@@ -131,12 +137,16 @@
         {
             // Request was cancelled - not an error
             Logger.LogInformation("LLM response streaming cancelled. ConversationId={ConversationId}", chatOptions.ConversationId);
+            // Unmask so user can retry or send another message
+            chatInput?.SetWaiting(false);
         }
         catch (Exception ex)
         {
             // Log unexpected errors
             Logger.LogError(ex, "Error while streaming response from LLM. ConversationId={ConversationId}", chatOptions.ConversationId);
             await InvokeAsync(StateHasChanged);
+            // Unmask so user is not locked out
+            chatInput?.SetWaiting(false);
             throw;
         }
 

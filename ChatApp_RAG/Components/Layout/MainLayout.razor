@@ -1,4 +1,21 @@
 ﻿@inherits LayoutComponentBase
+@inject IJSRuntime JS
+
+<header class="main-header">
+    <div class="page-width" style="display:flex;justify-content:space-between;align-items:center;padding:1rem 0;">
+        <div class="app-left" style="display:flex;align-items:center;gap:0.75rem;">
+            <img src="/img/QCbot_0.png" class="app-logo"/>
+            <div class="app-title">ChatApp RAG</div>
+        </div>
+
+        <div class="header-actions" aria-hidden="true">
+            <!-- header actions (kept for layout symmetry) -->
+        </div>
+    </div>
+</header>
+
+<!-- Fixed top-right theme toggle -->
+<button class="theme-toggle" @onclick="ToggleThemeAsync" title="Toggle dark / light mode">@themeIcon</button>
 
 @Body
 
@@ -7,3 +24,40 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+<script src="/js/theme.js"></script>
+
+@code {
+    private string themeIcon = "🌙";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // initialize theme from localStorage or prefers-color-scheme
+                var isDark = await JS.InvokeAsync<bool>("theme.init");
+                themeIcon = isDark ? "☀️" : "🌙";
+                StateHasChanged();
+            }
+            catch
+            {
+                // ignore JS errors
+            }
+        }
+    }
+
+    private async Task ToggleThemeAsync()
+    {
+        try
+        {
+            var isDark = await JS.InvokeAsync<bool>("theme.toggle");
+            themeIcon = isDark ? "☀️" : "🌙";
+        }
+        catch
+        {
+            // ignore
+        }
+    }
+}

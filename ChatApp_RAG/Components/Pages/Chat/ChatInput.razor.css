@@ -1,15 +1,16 @@
 ﻿.input-box {
     display: flex; 
     flex-direction: column; 
-    background: white;
-    border: 1px solid rgb(229, 231, 235);
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
     border-radius: 8px;
     padding: 0.5rem 0.75rem;
     margin-top: 0.75rem; 
+    position: relative;
 }
 
     .input-box:focus-within {
-        outline: 2px solid #4152d5;
+        outline: 2px solid var(--accent);
     }
 
 textarea {
@@ -17,6 +18,7 @@ textarea {
     border: none;
     outline: none;
     flex-grow: 1;
+    color: var(--text);
 }
 
     textarea:placeholder-shown + .tools {
@@ -40,18 +42,54 @@ textarea {
 }
 
     .send-button:hover {
-        color: black;
+        color: var(--text);
     }
 
 .attach {
-    background-color: white;
+    background-color: var(--input-bg);
     border-style: dashed;
-    color: #888;
-    border-color: #888;
+    color: var(--muted);
+    border-color: var(--muted);
     padding: 3px 8px;
 }
 
     .attach:hover {
-        background-color: #f0f0f0;
-        color: black;
+        background-color: rgba(0,0,0,0.04);
+        color: var(--text);
     }
+
+.send-button[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.input-mask {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 8px;
+}
+
+html.dark .input-mask {
+    background: rgba(0,0,0,0.4);
+}
+
+.spinner {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.1);
+    border-top-color: var(--accent);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.mask-text {
+    color: var(--muted);
+    font-size: 0.875rem;
+}

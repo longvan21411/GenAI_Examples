@@ -1,11 +1,11 @@
 ﻿.user-message {
-    background: rgb(182 215 232);
+    background: var(--user-bg);
     align-self: flex-end;
     min-width: 25%;
     max-width: calc(100% - 5rem);
     padding: 0.5rem 1.25rem;
     border-radius: 0.25rem; 
-    color: #1F2937; 
+    color: var(--text); 
     white-space: pre-wrap; 
 }
 
@@ -32,7 +32,7 @@
     width: 1.5rem; 
     height: 1.5rem; 
     color: #ffffff; 
-    background: #9b72ce;
+    background: var(--assistant-icon-bg);
 }
 
     .assistant-message-icon svg {
@@ -112,7 +112,7 @@
 }
 
 ::deep pre > code {
-    background-color: white;
+    background-color: var(--surface);
     display: block;
     padding: 0.5rem 1rem;
     margin: 1rem 0;

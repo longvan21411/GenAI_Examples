@@ -6,6 +6,11 @@
     padding-top: 0.75rem; 
     padding-bottom: 1.5rem; 
     border-top-width: 1px; 
-    background-color: #F3F4F6; 
-    border-color: #E5E7EB;
+    background-color: var(--surface); 
+    border-color: var(--border);
+}
+
+/* Ensure message list area has transparent background so overall page bg shows */
+.message-list-container, chat-messages.page-width.message-list {
+    background: transparent;
 }
