@@ -1,16 +1,7 @@
 using Microsoft.Extensions.Configuration;
-using Qdrant.Client;
-using Qdrant.Client.Grpc;
-using RestSharp;
-using Serilog;
-using System.Collections;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text.Json;
-using Microsoft.Extensions.AI;
-using Microsoft.Extensions.Configuration;
 using OpenAI;
+using Qdrant.Client;
+using Serilog;
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
