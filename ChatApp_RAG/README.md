@@ -75,3 +75,6 @@ BlazorStructureDemo/
 |    ↓                                                      |
 |Layout → Output HTML/JS.                                   |
 -------------------------------------------------------------
+
+
+#test
