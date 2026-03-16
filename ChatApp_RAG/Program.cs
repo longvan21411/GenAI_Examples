@@ -8,6 +8,7 @@ using Serilog;
 using Serilog.Events;
 using System.IO;
 using System.Text.Json;
+using Qdrant.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,32 +36,57 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-IConfiguration config = new ConfigurationBuilder()
-    .AddUserSecrets<Program>()
-    .Build();
-var token = config["GitHubAIModels:Token"];
+// Read configuration values from appsettings.json (and user secrets)
+var token = builder.Configuration["GitHubAIModels:Token"] ?? builder.Configuration["ChatApp_RAG:GitHubModel:Token"];
 if (string.IsNullOrWhiteSpace(token))
 {
     throw new InvalidOperationException("API token 'GitHubAIModels:Token' is missing or empty.");
 }
 
+var endpointString = builder.Configuration["ChatApp_RAG:GitHubModel:Endpoint"] ?? "https://models.inference.ai.azure.com";
+if (!Uri.TryCreate(endpointString, UriKind.Absolute, out var endpointUri))
+{
+    throw new InvalidOperationException($"Invalid endpoint URI: {endpointString}");
+}
+
+var llmModel = builder.Configuration["ChatApp_RAG:GitHubModel:LLMModel"] ?? "gpt-4o-mini";
+var embeddingModel = builder.Configuration["ChatApp_RAG:GitHubModel:EmbeddingModel"] ?? "text-embedding-3-small";
+var vectorSize = int.TryParse(builder.Configuration["ChatApp_RAG:GitHubModel:VectorSize"], out var vs) ? vs : 1536;
+var maxToken = int.TryParse(builder.Configuration["ChatApp_RAG:GitHubModel:MaxToken"], out var mt) ? mt : 4096;
+
 var credential = new System.ClientModel.ApiKeyCredential(token);
 var openAIOptions = new OpenAIClientOptions()
 {
-    Endpoint = new Uri("https://models.inference.ai.azure.com")
+    Endpoint = endpointUri
 };
 
 var ghModelsClient = new OpenAIClient(credential, openAIOptions);
-var chatClient = ghModelsClient.GetChatClient("gpt-4o-mini").AsIChatClient();
+var chatClient = ghModelsClient.GetChatClient(llmModel).AsIChatClient();
 
 // Get the raw embedding client and also the typed IEmbeddingGenerator for DI consumers
-var rawEmbeddingClient = ghModelsClient.GetEmbeddingClient("text-embedding-3-small");
+var rawEmbeddingClient = ghModelsClient.GetEmbeddingClient(embeddingModel);
 var embeddingGenerator = rawEmbeddingClient.AsIEmbeddingGenerator();
 
-var vectorStorePath = Path.Combine(AppContext.BaseDirectory, "vector-store.db");
-var vectorStoreConnectionString = $"Data Source={vectorStorePath}";
-builder.Services.AddSqliteVectorStore(_ => vectorStoreConnectionString);
-builder.Services.AddSqliteCollection<string, IngestedChunk>(IngestedChunk.CollectionName, vectorStoreConnectionString);
+// Configure vector store based on appsettings. Support LocalDatabase (SQLite) by default.
+var activeDb = builder.Configuration["ChatApp_RAG:VectorDatabase:ActiveVectorDatabase"] ?? "LocalDatabase";
+string vectorStoreConnectionString;
+if (string.Equals(activeDb, "QdrantDatabase", StringComparison.OrdinalIgnoreCase))
+{
+    var client = new QdrantClient("localhost", 6334);
+    //builder.Services.Add<string, IngestedChunk>(IngestedChunk.CollectionName, vectorStoreConnectionString);
+}
+else
+{
+    vectorStoreConnectionString = builder.Configuration["ChatApp_RAG:VectorDatabase:LocalDatabase:ConnectionString"];
+    if (string.IsNullOrWhiteSpace(vectorStoreConnectionString))
+    {
+        var vectorStorePath = Path.Combine(AppContext.BaseDirectory, "vector-store.db");
+        vectorStoreConnectionString = $"Data Source={vectorStorePath}";
+    }
+
+    builder.Services.AddSqliteVectorStore(_ => vectorStoreConnectionString);
+    builder.Services.AddSqliteCollection<string, IngestedChunk>(IngestedChunk.CollectionName, vectorStoreConnectionString);
+}
 
 builder.Services.AddSingleton<DataIngestor>();
 builder.Services.AddSingleton<SemanticSearch>();

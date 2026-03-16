@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using OpenAI;
 using Qdrant.Client;
+using Qdrant.Client.Grpc;
 using Serilog;
 
 // Configure Serilog
@@ -291,11 +292,11 @@ var embeddingGenerator = openAiClient.GetEmbeddingClient("openai/text-embedding-
 
 #region Upsert a point through QdrantClient with vector data call from `text-embedding-3-small` model
 
-//var points = new List<PointStruct>();
-//var catEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "cat" }).Result;
-//var catVector = catEmbedding.Value[0].ToFloats().Span;
-//var catPoint = new PointStruct { Id = 1, Vectors = catVector.ToArray() };
-//catPoint.Payload["animal"] = "cat";
+var points = new List<PointStruct>();
+var catEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "cat" }).Result;
+var catVector = catEmbedding.Value[0].ToFloats().Span;
+var catPoint = new PointStruct { Id = 1, Vectors = catVector.ToArray() };
+catPoint.Payload["animal"] = "cat";
 //points.Add(catPoint);
 
 //var kittenEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { "kitten" }).Result;

@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp_RAG", "ChatApp_RAG\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QdrantConsole", "QdrantConsole\QdrantConsole.csproj", "{552D4B46-5FEC-EB78-D48E-618F837EAF5B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatappRAG_Qdrant", "ChatappRAG_Qdrant\ChatappRAG_Qdrant.csproj", "{7CB3BD5C-CFC7-4B97-9496-5733E7322057}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{552D4B46-5FEC-EB78-D48E-618F837EAF5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{552D4B46-5FEC-EB78-D48E-618F837EAF5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{552D4B46-5FEC-EB78-D48E-618F837EAF5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CB3BD5C-CFC7-4B97-9496-5733E7322057}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CB3BD5C-CFC7-4B97-9496-5733E7322057}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CB3BD5C-CFC7-4B97-9496-5733E7322057}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CB3BD5C-CFC7-4B97-9496-5733E7322057}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
