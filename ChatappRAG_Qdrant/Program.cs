@@ -52,80 +52,14 @@ try
     var collectionExists = collections.Contains(collectionName);
 
     #region Create Qdrant collection and points -- seed data
-    //if (!collectionExists)
-    //{
-    //    await qdrantClient.CreateCollectionAsync(collectionName, new VectorParams { Size = 1536, Distance = Distance.Cosine });
-    //}
-    //else
-    //{
-    //    Log.Information("Collection '{Collection}' already exists.", collectionName);
-    //}
 
-    //// Load movie data JSON
-    //var jsonPath = Path.Combine("Data", "MovieData.json");
-    //if (!File.Exists(jsonPath))
-    //{
-    //    Log.Error("Movie data file not found at {Path}", jsonPath);
-    //    return;
-    //}
-
-    //using var stream = File.OpenRead(jsonPath);
-    //using var doc = await JsonDocument.ParseAsync(stream);
-    //if (!doc.RootElement.TryGetProperty("movies", out var moviesEl) || moviesEl.ValueKind != JsonValueKind.Array)
-    //{
-    //    Log.Error("Movie data JSON does not contain a 'movies' array.");
-    //    return;
-    //}
-
-    //var restPoints = new List<object>();
-    //var points = new List<PointStruct>();
-    //long countItem = 0;
-    //foreach (var item in moviesEl.EnumerateArray())
-    //{
-    //    try
-    //    {
-
-    //        var id = item.GetProperty("id").GetInt32();
-    //        var title = item.GetProperty("title").GetString() ?? string.Empty;
-    //        var year = item.GetProperty("year").GetString() ?? string.Empty;
-    //        var genres = item.TryGetProperty("genres", out var g) && g.ValueKind == JsonValueKind.Array
-    //            ? g.EnumerateArray().Select(x => x.GetString() ?? string.Empty).ToArray()
-    //            : Array.Empty<string>();
-    //        var director = item.TryGetProperty("director", out var d) ? d.GetString() ?? string.Empty : string.Empty;
-    //        var actors = item.TryGetProperty("actors", out var a) ? a.GetString() ?? string.Empty : string.Empty;
-    //        var plot = item.TryGetProperty("plot", out var p) ? p.GetString() ?? string.Empty : string.Empty;
-    //        var poster = item.TryGetProperty("posterUrl", out var pu) ? pu.GetString() ?? string.Empty : string.Empty;
-
-    //        var textForEmbedding = $"{title} {year} {string.Join(' ', genres)} {director} {actors} {plot}";
-
-    //        // Generate embedding           
-    //        var movieEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { textForEmbedding }).Result;
-    //        var movieVector = movieEmbedding.Value[0].ToFloats().Span;
-
-    //        countItem++;
-    //        var point = new PointStruct
-    //        {
-    //            Id = new PointId { Num = (ulong)countItem },
-    //            Vectors = new Vectors { Vector = new Qdrant.Client.Grpc.Vector { Data = { movieVector.ToArray() } } }
-    //        };
-    //        // Add payload entries individually to the read-only MapField
-    //        point.Payload.Add("title", new Value { StringValue = title });
-    //        point.Payload.Add("year", new Value { StringValue = year });
-    //        point.Payload.Add("director", new Value { StringValue = director });
-    //        point.Payload.Add("actors", new Value { StringValue = actors });
-    //        point.Payload.Add("plot", new Value { StringValue = plot });
-    //        point.Payload.Add("posterUrl", new Value { StringValue = poster });
-
-    //        points.Add(point);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        Log.Warning(ex, "Failed processing a movie element");
-    //    }
-    //}
-
-    //await qdrantClient.UpsertAsync(collectionName: collectionName, points: points);
-    //Log.Information("Finished upserting points to Qdrant with vector size = 1536");
+    // execute ceed movie data JSON
+    var jsonPath = Path.Combine("Data", "MovieData.json");
+    if (File.Exists(jsonPath))
+    {
+       QdrantService.ExecuteCeedData(qdrantClient, embeddingGenerator, jsonPath);
+    }
+    
     #endregion
 
     #region Chat with Qdrant using the RAG approach
@@ -154,43 +88,35 @@ try
             continue;
         }
 
+        if (query.Trim().Equals("chat_history", StringComparison.OrdinalIgnoreCase))
+        {
+            Console.Write("\nChat history: ");
+            foreach (var chatHistory in history.GetMessages())
+            {
+                Console.Write("\n");
+                Console.Write(chatHistory);
+            }
+            break;
+        }
+
         var queryEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { query }).Result;
         var queryVector = queryEmbedding.Value[0].ToFloats().Span;
         var results = await qdrantClient.SearchAsync(collectionName: collectionName,
             vector: queryVector.ToArray(),
-            limit: 10
+            limit: 3
             );
 
         var searchResult = new HashSet<string>();
         StringBuilder movieInfo = new StringBuilder();
         foreach (var movie in results)
-        {
-            
+        {            
             if (movie.Payload != null)
             {
-                movie.Payload.TryGetValue("title", out var title);
-                movieInfo.Append("\n");
-                movieInfo.Append("title of movie: " +title?.ToString() ?? string.Empty);
-
-                movie.Payload.TryGetValue("year", out var year);
-                movieInfo.Append("\n");
-                movieInfo.Append("year: " + year?.ToString() ?? string.Empty);
-
-                movie.Payload.TryGetValue("director", out var director);
-                movieInfo.Append("\n");
-                movieInfo.Append("directed by: " + director?.ToString() ?? string.Empty);
-
-                movie.Payload.TryGetValue("actors", out var actors);
-                movieInfo.Append("\n");
-                movieInfo.Append("actors: " + actors?.ToString() ?? string.Empty);
-
-                movie.Payload.TryGetValue("plot", out var plot);
-                movieInfo.Append("\n");
-                movieInfo.Append("plot: " + plot?.ToString() ?? string.Empty);
-
-                movie.Payload.TryGetValue("posterUrl", out var posterUrl);
-                movieInfo.Append("\n");
-                movieInfo.Append("poster: " + posterUrl?.ToString() ?? string.Empty);
+                movie.Payload.TryGetValue("movie", out var title);
+                movieInfo.Append("\n");                
+                movieInfo.Append("movie infomation: " +title?.StringValue ?? string.Empty);
+                movieInfo.AppendLine("\n==============================================");
+                movieInfo.AppendLine();
             }
             Log.Information("Point Id={Id} Movie information ={info}", movie.Id, movieInfo.ToString());
         }
@@ -221,9 +147,8 @@ try
             responseText.Append(response.Text);
         }
 
-        history.AddMessage(responseText.ToString().Trim());
+        history.AddMessage(responseText.ToString().Trim());               
         Console.WriteLine("\n");
-        
     }
     #endregion
 
