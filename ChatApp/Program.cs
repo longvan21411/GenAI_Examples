@@ -31,7 +31,7 @@ var openAIOptions = new OpenAIClientOptions()
 var client = new OpenAIClient(credential, openAIOptions).GetChatClient(model).AsIChatClient();
 
 // Start the conversation with context for the AI model
-List<ChatMessage> chatHistory = new()
+List<ChatMessage> chatHistories = new()
 {
     new ChatMessage(ChatRole.System, """
         You are a friendly hiking enthusiast who helps people discover fun hikes in their area.
@@ -49,7 +49,7 @@ List<ChatMessage> chatHistory = new()
 
 while (true)
 {
-    Console.Write("Your prompt (type 'exit' to quit): ");
+    Console.Write("Your question: ");
     var userPrompt = Console.ReadLine();
 
     if (userPrompt == null) // input stream closed
@@ -64,14 +64,26 @@ while (true)
         continue;
     }
 
-    chatHistory.Add(new ChatMessage(ChatRole.User, userPrompt));
+    if (userPrompt.Trim().Equals("chat_history", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.WriteLine("=======================Chat history===============");
+        foreach (var message in chatHistories)
+        {
+            Console.WriteLine($"{message.Role}: {message.Text}");
+            Console.WriteLine($"\n");
+        }
+        Console.WriteLine("=======================End history===============");
+        continue;
+    }
+
+    chatHistories.Add(new ChatMessage(ChatRole.User, userPrompt));
 
     Console.WriteLine("AI response:");
     var response = string.Empty;
 
     try
     {
-        await foreach (ChatResponseUpdate item in client.GetStreamingResponseAsync(chatHistory, options: null, CancellationToken.None))
+        await foreach (ChatResponseUpdate item in client.GetStreamingResponseAsync(chatHistories, options: null, CancellationToken.None))
         {
             Console.Write(item.Text);
             response += item.Text;
@@ -79,7 +91,7 @@ while (true)
        
         Console.WriteLine();
         // Keep assistant reply in history for context
-        chatHistory.Add(new ChatMessage(ChatRole.Assistant, response));
+        chatHistories.Add(new ChatMessage(ChatRole.Assistant, response));
     }
     catch (OperationCanceledException)
     {

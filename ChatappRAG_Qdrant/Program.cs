@@ -20,7 +20,7 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.File("logs/qdrant-console-.log", rollingInterval: Serilog.RollingInterval.Day)
     .CreateLogger();
 
-Log.Information("Starting Qdrant console app");
+//Log.Information("Starting Qdrant console app");
 
 try
 {
@@ -59,10 +59,11 @@ try
     {
        QdrantService.ExecuteCeedData(qdrantClient, embeddingGenerator, jsonPath);
     }
-    
+
     #endregion
 
     #region Chat with Qdrant using the RAG approach
+    //ChatService.ChatAsync(credential, openAIOptions, qdrantClient, embeddingGenerator, collectionName).Wait();
     // create a chat client
     var model = "openai/gpt-5-mini";
     var client = new OpenAIClient(credential, openAIOptions).GetChatClient(model).AsIChatClient();
@@ -73,14 +74,14 @@ try
         Console.Write("\nYour question: ");
         var query = Console.ReadLine();
 
-        if (query == null) 
+        if (query == null)
             break;
 
         if (query.Trim().Equals("exit", StringComparison.OrdinalIgnoreCase))
         {
             Console.WriteLine("Exiting the application. Goodbye!");
             break;
-        }           
+        }
 
         if (string.IsNullOrWhiteSpace(query))
         {
@@ -90,35 +91,37 @@ try
 
         if (query.Trim().Equals("chat_history", StringComparison.OrdinalIgnoreCase))
         {
+            Console.Write("=================================================== ");
             Console.Write("\nChat history: ");
             foreach (var chatHistory in history.GetMessages())
             {
                 Console.Write("\n");
                 Console.Write(chatHistory);
             }
+            Console.Write("\n=================================================== ");
             break;
         }
 
         var queryEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { query }).Result;
         var queryVector = queryEmbedding.Value[0].ToFloats().Span;
-        var results = await qdrantClient.SearchAsync(collectionName: collectionName,
+        var results = qdrantClient.SearchAsync(collectionName: collectionName,
             vector: queryVector.ToArray(),
             limit: 3
-            );
+            ).Result;
 
         var searchResult = new HashSet<string>();
         StringBuilder movieInfo = new StringBuilder();
         foreach (var movie in results)
-        {            
+        {
             if (movie.Payload != null)
             {
                 movie.Payload.TryGetValue("movie", out var title);
-                movieInfo.Append("\n");                
-                movieInfo.Append("movie infomation: " +title?.StringValue ?? string.Empty);
+                movieInfo.Append("\n");
+                movieInfo.Append("movie infomation: " + title?.StringValue ?? string.Empty);
                 movieInfo.AppendLine("\n==============================================");
                 movieInfo.AppendLine();
             }
-            Log.Information("Point Id={Id} Movie information ={info}", movie.Id, movieInfo.ToString());
+            //Log.Information("Point Id={Id} Movie information ={info}", movie.Id, movieInfo.ToString());
         }
 
         var context = string.Join(Environment.NewLine, searchResult);
@@ -141,13 +144,13 @@ try
 
         var responseText = new StringBuilder();
         var responses = client.GetStreamingResponseAsync([systemMessage, userMsg], options: null, CancellationToken.None);
-        await foreach(var response in responses)
+        await foreach (var response in responses)
         {
             Console.Write(response.Text);
             responseText.Append(response.Text);
         }
 
-        history.AddMessage(responseText.ToString().Trim());               
+        history.AddMessage(responseText.ToString().Trim());
         Console.WriteLine("\n");
     }
     #endregion

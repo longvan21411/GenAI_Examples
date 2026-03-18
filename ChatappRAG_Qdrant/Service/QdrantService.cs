@@ -52,11 +52,20 @@ namespace ChatappRAG_Qdrant.Service
                             var plot = item.TryGetProperty("plot", out var p) ? p.GetString() ?? string.Empty : string.Empty;
                             var poster = item.TryGetProperty("posterUrl", out var pu) ? pu.GetString() ?? string.Empty : string.Empty;
 
-                            var textForEmbedding = $"{title} {year} {string.Join(' ', genres)} {director} {actors} {plot}";
+                            var textEmbedding = string.Concat("Title: ", title,
+                                " Year ", year,
+                                " Genres ", string.Join(", ", genres),
+                                " Director ", director,
+                                " Actors ", actors,
+                                " Plot ", plot);
 
-                            // Generate embedding           
-                            var movieEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { textForEmbedding }).Result;
+                            // Generate embedding
+                            Console.Write("Getting the embedding data... ");
+                            Console.Write("\n");
+                            var movieEmbedding = embeddingGenerator.GenerateEmbeddingsAsync(new[] { textEmbedding }).Result;
                             var movieVector = movieEmbedding.Value[0].ToFloats().Span;
+                            Console.Write("Embedding data retrieved.");
+                            Console.Write("\n");
 
                             countItem++;
                             var point = new PointStruct
@@ -64,12 +73,19 @@ namespace ChatappRAG_Qdrant.Service
                                 Id = new PointId { Num = (ulong)countItem },
                                 Vectors = new Vectors { Vector = new Qdrant.Client.Grpc.Vector { Data = { movieVector.ToArray() } } }
                             };
+
                             // Add payload entries individually to the read-only MapField
-                            var payload = string.Join(' ', title, "\n", year, "\n", string.Join(' ', genres), "\n",director,"\n", actors,"\n", plot);                           
-                            point.Payload.Add("movie", payload);
-                            //point.Payload["movie"] = payload;
+                           var payload = string.Concat("\n Title: ", title,
+                            "\n Year: ", year,
+                                "\n Genres: ", string.Join(", ", genres),
+                                "\n Director: ", director,
+                                "\n Actors: ", actors,
+                                "\n Plot: ", plot);
+                            point.Payload.Add("movie", payload);                           
 
                             points.Add(point);
+                            Console.Write("Waiting to fetch the vector data..... ");
+                            Console.Write("\n");
                         }
                         catch (Exception ex)
                         {
@@ -80,6 +96,8 @@ namespace ChatappRAG_Qdrant.Service
                     var upsertResponse = qdrantClient.UpsertAsync(collectionName: collectionName, points: points).Result;
                     if (upsertResponse != null)
                     {
+                        Console.Write($"Done processing the ceed data succesfully... {points.Count} points were inserted!!!");
+                        Console.Write("\n");
                         Log.Information("Upsert response: {Response}", JsonSerializer.Serialize(upsertResponse));
 
                         // Verification: do a quick search using the first inserted vector
