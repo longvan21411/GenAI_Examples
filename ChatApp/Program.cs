@@ -8,12 +8,12 @@ using OpenAI;
 
 // setup configuration to read API token from user secrets
 IConfiguration config = new ConfigurationBuilder()
-    .AddUserSecrets<Program>()
+    .AddUserSecrets<Program>()// only run and impact on development environment, ignored in production
     .Build();
 
 var endpoint = new Uri("https://models.github.ai/inference");
 
-var token = config["GitHubModels:Token"];
+var token = config["GitHubModels:Token"];// this should be set in user secrets with the key "GitHubAIModels:Token"
 if (string.IsNullOrWhiteSpace(token))
 {
     throw new InvalidOperationException("API token 'GitHubModels:Token' is missing or empty.");

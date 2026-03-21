@@ -12,7 +12,7 @@ IConfiguration config = new ConfigurationBuilder()
 
 var endpoint = new Uri("https://models.github.ai/inference");
 
-var token = config["GitHubAIModels:Token"];
+var token = config["GitHubAIModels:Token"];// this should be set in user secrets with the key "GitHubAIModels:Token"
 if (string.IsNullOrWhiteSpace(token))
 {
     throw new InvalidOperationException("API token 'GitHubModels:Token' is missing or empty.");

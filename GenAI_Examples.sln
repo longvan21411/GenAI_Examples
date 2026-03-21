@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp_Ollama", "ChatApp_O
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleOllamaConsole", "SimpleOllamaConsole\SimpleOllamaConsole.csproj", "{418CE53E-646F-B85F-6F3E-9908BA2E3A66}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageSimilaritySearch", "ImageSimilaritySearch\ImageSimilaritySearch.csproj", "{7FF01D17-2C31-4BB4-8D3D-1C899004B8DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,10 @@ Global
 		{418CE53E-646F-B85F-6F3E-9908BA2E3A66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{418CE53E-646F-B85F-6F3E-9908BA2E3A66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{418CE53E-646F-B85F-6F3E-9908BA2E3A66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FF01D17-2C31-4BB4-8D3D-1C899004B8DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FF01D17-2C31-4BB4-8D3D-1C899004B8DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FF01D17-2C31-4BB4-8D3D-1C899004B8DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FF01D17-2C31-4BB4-8D3D-1C899004B8DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
