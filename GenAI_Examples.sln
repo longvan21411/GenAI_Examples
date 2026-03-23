@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleOllamaConsole", "Simp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageSimilaritySearch", "ImageSimilaritySearch\ImageSimilaritySearch.csproj", "{7FF01D17-2C31-4BB4-8D3D-1C899004B8DF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageEmbedding_CSharp_OpenSource", "ImageEmbedding_CSharp_OpenSource\ImageEmbedding_CSharp_OpenSource.csproj", "{04AA7AD8-CC52-4CFA-ABE4-FD90647A4D5A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,10 @@ Global
 		{7FF01D17-2C31-4BB4-8D3D-1C899004B8DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FF01D17-2C31-4BB4-8D3D-1C899004B8DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7FF01D17-2C31-4BB4-8D3D-1C899004B8DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04AA7AD8-CC52-4CFA-ABE4-FD90647A4D5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04AA7AD8-CC52-4CFA-ABE4-FD90647A4D5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04AA7AD8-CC52-4CFA-ABE4-FD90647A4D5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04AA7AD8-CC52-4CFA-ABE4-FD90647A4D5A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
