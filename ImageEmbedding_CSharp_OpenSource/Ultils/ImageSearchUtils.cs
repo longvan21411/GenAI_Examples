@@ -25,13 +25,23 @@ namespace ImageEmbedding_CSharp_OpenSource.Ultils
         private static readonly int ResizeSize;
         private static readonly int Grid;
 
-        private record ImageSearchConfig
+        // Make the config record public to match the public method that returns it
+        public record ImageSearchConfig
         {
             public int ImageResize { get; init; } = 64;
             public int SpatialGrid { get; init; } = 4;
+            public string ActiveCLIPModel { get; init; } = "false";
         }
 
         static ImageSearchUtils()
+        {
+            
+            var cfg = GetImageSearchConfigInfo();
+            ResizeSize = Math.Max(1, cfg.ImageResize);
+            Grid = Math.Max(1, cfg.SpatialGrid);
+        }
+
+        public static ImageSearchConfig GetImageSearchConfigInfo()
         {
             var configPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
             var cfg = new ImageSearchConfig();
@@ -43,8 +53,7 @@ namespace ImageEmbedding_CSharp_OpenSource.Ultils
                 if (parsed != null) cfg = parsed;
             }
 
-            ResizeSize = Math.Max(1, cfg.ImageResize);
-            Grid = Math.Max(1, cfg.SpatialGrid);
+            return cfg;
         }
 
         public static float[] ComputeImageEmbedding(string path)
@@ -114,9 +123,9 @@ namespace ImageEmbedding_CSharp_OpenSource.Ultils
             var inputs = new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor("input", inputTensor) };
             using var results = session.Run(inputs);
             float[] imgEmbedding = results.First().AsTensor<float>().ToArray(); // 512-dim vector
-            
+
             // Normalize image embedding so cosine similarity becomes a simple dot product at query time
-            NormalizeInPlace(imgEmbedding);
+            NormalizeInPlace_CLIP(imgEmbedding);
 
             return imgEmbedding;
         }
@@ -219,7 +228,7 @@ namespace ImageEmbedding_CSharp_OpenSource.Ultils
 
             using var results = textSession.Run(namedInputs);
             var outTensor = results.First().AsTensor<float>();
-            return [.. outTensor];
+            return outTensor.ToArray();
         }
 
         private static void NormalizeInPlace(float[] v)
@@ -290,6 +299,21 @@ namespace ImageEmbedding_CSharp_OpenSource.Ultils
             return similarity;
         }
 
+        public static float CLIPCosineSimilarity2(float[] a, float[] b)
+        {
+            float dot = 0f;
+            for (int i = 0; i < a.Length; i++) dot += a[i] * b[i];
+            return dot;
+        }
+
+        private static void NormalizeInPlace_CLIP(Span<float> vec)
+        {
+            float norm = 0f;
+            for (int i = 0; i < vec.Length; i++) norm += vec[i] * vec[i];
+            norm = MathF.Sqrt(norm);
+            for (int i = 0; i < vec.Length; i++) vec[i] /= norm;
+        }
+
         public static string[] SplitArgs(string line)
         {
             var parts = new List<string>();
@@ -306,7 +330,7 @@ namespace ImageEmbedding_CSharp_OpenSource.Ultils
                 sb.Append(c);
             }
             if (sb.Length > 0) parts.Add(sb.ToString());
-            return [.. parts];
+            return parts.ToArray();
         }
     }
 }

@@ -21,3 +21,6 @@ search "This is a gray cat"
 search "C:\Users\TVV2HC\source\repos\Github\Img\cat\afhq\val\cat\flickr_cat_000016.jpg"
 search "C:\Users\TVV2HC\source\repos\Github\Img\cat\afhq\val\cat\flickr_cat_000011.jpg"
 search "C:\Users\TVV2HC\source\repos\Github\Img\cat\afhq\val\cat\flickr_cat_000056.jpg"
+
+#search by CLIP with image embedding - not OK
+search "C:\\Users\\TVV2HC\\source\\repos\\Github\\GenAI_Examples\\ImageEmbedding_CSharp_OpenSource\\bin\\Debug\\net9.0\\imgs\\cat_CLIP\\flickr_cat_000016.jpg"

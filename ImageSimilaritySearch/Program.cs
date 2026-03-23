@@ -13,8 +13,8 @@ public class Program
     {
         var imageDir = Path.Combine(AppContext.BaseDirectory, "imgs/cat");
         Directory.CreateDirectory(imageDir);
-        var indexFile = Path.Combine(AppContext.BaseDirectory, "image_index.json");
 
+        var indexFile = Path.Combine(AppContext.BaseDirectory, "image_index.json");
         var index = File.Exists(indexFile)
             ? JsonSerializer.Deserialize<List<ImageSearchUtils.ImageIndexEntry>>(File.ReadAllText(indexFile)) ?? new()
             : new List<ImageSearchUtils.ImageIndexEntry>();

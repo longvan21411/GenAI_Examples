@@ -10,9 +10,24 @@ using System.Text;
 using System.Text.Json;
 using ImageEmbedding_CSharp_OpenSource.Ultils;
 
-var imageDir = Path.Combine(AppContext.BaseDirectory, "imgs\\cat_128");
+var isCLIPModelActive = false;
+var imgIndexPath = "imgs\\cat";
+var imgIndexStorePath = "image_index.json";
+var config = ImageSearchUtils.GetImageSearchConfigInfo();
+if(config != null)
+{
+    bool.TryParse(config.ActiveCLIPModel,out bool isCLIPActive);
+    if (isCLIPActive)
+    {
+        imgIndexPath = "imgs\\cat_CLIP";
+        imgIndexStorePath = "image_index_CLIP.json";
+        isCLIPModelActive = true;
+    }
+}
+
+var imageDir = Path.Combine(AppContext.BaseDirectory, imgIndexPath);
 Directory.CreateDirectory(imageDir);
-var indexFile = Path.Combine(AppContext.BaseDirectory, "image_index_128.json");
+var indexFile = Path.Combine(AppContext.BaseDirectory, imgIndexStorePath);
 
 var index = File.Exists(indexFile)
     ? JsonSerializer.Deserialize<List<ImageSearchUtils.ImageIndexEntry>>(File.ReadAllText(indexFile)) ?? new()
@@ -42,8 +57,8 @@ while (true)
 
         var dest = Path.Combine(imageDir, Path.GetFileName(path));
         File.Copy(path, dest, true);
-        var imgEmbedding = ImageSearchUtils.ComputeImageEmbedding(dest);//GetCLIPImageEmbedding(dest);//ComputeImageEmbedding(dest);
-        var descrEmbedding = ImageSearchUtils.ComputeTextEmbeddingApprox(desc);//GetCLIPTextEmbedding(desc);//ComputeTextEmbeddingApprox(desc);
+        var imgEmbedding = isCLIPModelActive ? ImageSearchUtils.GetCLIPImageEmbedding(dest): ImageSearchUtils.ComputeImageEmbedding(dest);
+        var descrEmbedding = isCLIPModelActive ? ImageSearchUtils.GetCLIPTextEmbedding(desc): ImageSearchUtils.ComputeTextEmbeddingApprox(desc);
         var entry = new ImageSearchUtils.ImageIndexEntry(dest, desc, imgEmbedding, descrEmbedding);
         index.Add(entry);
         File.WriteAllText(indexFile, JsonSerializer.Serialize(index));
@@ -56,10 +71,9 @@ while (true)
         if (query.EndsWith(".jpg") || query.EndsWith(".png"))
         {
             //search by image embedding similarity
-            var qEmb = ImageSearchUtils.ComputeImageEmbedding(query);//GetCLIPImageEmbedding(query);
+            var qEmb = isCLIPModelActive ? ImageSearchUtils.GetCLIPImageEmbedding(query): ImageSearchUtils.ComputeImageEmbedding(query);
             var imgResults = index
-            //.Select(e => new { Entry = e, Score = ImageSearchUtils.CLIPCosineSimilarity(e.ImageEmbedding, qEmb) })
-            .Select(e => new { Entry = e, Score = ImageSearchUtils.CosineSimilarity(e.ImageEmbedding, qEmb) })
+            .Select(e => new { Entry = e, Score = isCLIPModelActive ? ImageSearchUtils.CLIPCosineSimilarity(e.ImageEmbedding, qEmb) : ImageSearchUtils.CosineSimilarity(e.ImageEmbedding, qEmb) })
             .OrderByDescending(x => x.Score)
             .Take(3)
             .ToList();
@@ -73,10 +87,9 @@ while (true)
         else
         {
             //search by text embedding similarity
-            var qEmb = ImageSearchUtils.ComputeTextEmbeddingApprox(query);//GetCLIPTextEmbedding(query);//ComputeTextEmbeddingApprox(query);
+            var qEmb = ImageSearchUtils.GetCLIPTextEmbedding(query);//GetCLIPTextEmbedding(query);//ComputeTextEmbeddingApprox(query);
             var imgResults = index
-            //.Select(e => new { Entry = e, Score = ImageSearchUtils.CLIPCosineSimilarity(e.DescriptionEmbedding, qEmb) })
-            .Select(e => new { Entry = e, Score = ImageSearchUtils.CosineSimilarity(e.DescriptionEmbedding, qEmb) })
+            .Select(e => new { Entry = e, Score = isCLIPModelActive ? ImageSearchUtils.CLIPCosineSimilarity(e.DescriptionEmbedding, qEmb) : ImageSearchUtils.CosineSimilarity(e.DescriptionEmbedding, qEmb) })
             .OrderByDescending(x => x.Score)
             .Take(5)
             .ToList();
