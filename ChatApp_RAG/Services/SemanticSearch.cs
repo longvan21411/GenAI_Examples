@@ -2,6 +2,7 @@
 using Microsoft.Extensions.VectorData;
 using System.Linq;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace ChatApp_RAG.Services;
 
@@ -33,13 +34,21 @@ public class SemanticSearch(
     /// </summary>
     public async Task<bool> HasRelevantDocumentsAsync(string text, string? documentIdFilter, int maxResults = 1)
     {
-        await LoadDocumentsAsync();
-
-        var nearest = vectorCollection.SearchAsync(text, maxResults, new VectorSearchOptions<IngestedChunk>
+        try
         {
-            Filter = documentIdFilter is { Length: > 0 } ? record => record.DocumentId == documentIdFilter : null,
-        });
+            await LoadDocumentsAsync();
 
-        return await nearest.AnyAsync();
+            var nearest = vectorCollection.SearchAsync(text, maxResults, new VectorSearchOptions<IngestedChunk>
+            {
+                Filter = documentIdFilter is { Length: > 0 } ? record => record.DocumentId == documentIdFilter : null,
+            });
+
+            return await nearest.AnyAsync();
+        } catch (Exception ex)
+        {
+            // Use Serilog to capture full exception details. Include guidance for common 401 issues.
+            Log.Error(ex, "Error during HasRelevantDocumentsAsync. If this is an HTTP 401 (Unauthorized), verify your model provider credentials and endpoint configuration (appsettings/user-secrets). Exception: {Message}", ex.Message);
+            return false; 
+        }       
     }
 }

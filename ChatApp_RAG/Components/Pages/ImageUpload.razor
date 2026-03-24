@@ -1,0 +1,19 @@
+@page "/image-upload"
+@using Microsoft.AspNetCore.Components.Forms
+
+<h3>Image Upload</h3>
+<p>Upload images to associate with the assistant (placeholder page).</p>
+
+<InputFile OnChange="OnInputFileChange" multiple />
+
+@code {
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles())
+        {
+            // Placeholder: you can save files to wwwroot or send to server API
+            Console.WriteLine($"Received file: {file.Name}, size: {file.Size}");
+            await Task.CompletedTask;
+        }
+    }
+}

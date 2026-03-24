@@ -78,3 +78,11 @@ BlazorStructureDemo/
 
 
 #test
+
+I want to split current main layout to three parts.
+•	top header include logo, title and dark/ light button
+•	left panel include two button (New chat and Add new image)
+•	content page include current chat page and image upload page, and user can switch between them by clicking the button in left panel.
+•	Chat input will be fixed at the bottom of content page, and only show when user is in chat page. It will be hidden when user switch to image upload page.
+
+

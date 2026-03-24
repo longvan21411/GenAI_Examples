@@ -49,6 +49,14 @@ if (!Uri.TryCreate(endpointString, UriKind.Absolute, out var endpointUri))
     throw new InvalidOperationException($"Invalid endpoint URI: {endpointString}");
 }
 
+// Log masked token/endpoint to help diagnose 401 without leaking secrets
+try
+{
+    var maskedToken = token?.Length > 8 ? token.Substring(0, 4) + new string('*', Math.Max(0, token.Length - 8)) + token.Substring(token.Length - 4) : token;
+    Log.Information("Using model endpoint {Endpoint} and token {TokenPreview}", endpointUri, maskedToken);
+}
+catch { }
+
 var llmModel = builder.Configuration["ChatApp_RAG:GitHubModel:LLMModel"] ?? "gpt-4o-mini";
 var embeddingModel = builder.Configuration["ChatApp_RAG:GitHubModel:EmbeddingModel"] ?? "text-embedding-3-small";
 var vectorSize = int.TryParse(builder.Configuration["ChatApp_RAG:GitHubModel:VectorSize"], out var vs) ? vs : 1536;
@@ -69,15 +77,45 @@ var embeddingGenerator = rawEmbeddingClient.AsIEmbeddingGenerator();
 
 // Configure vector store based on appsettings. Support LocalDatabase (SQLite) by default.
 var activeDb = builder.Configuration["ChatApp_RAG:VectorDatabase:ActiveVectorDatabase"] ?? "LocalDatabase";
-string vectorStoreConnectionString;
+
 if (string.Equals(activeDb, "QdrantDatabase", StringComparison.OrdinalIgnoreCase))
 {
-    var client = new QdrantClient("localhost", 6334);
-    //builder.Services.Add<string, IngestedChunk>(IngestedChunk.CollectionName, vectorStoreConnectionString);
+    // If you intend to use Qdrant you must register a Qdrant-backed VectorStore here.
+    // The previous implementation did not register the VectorStore services for Qdrant,
+    // which causes DI resolution failures for DataIngestor and SemanticSearch.
+    //
+    // Two options:
+    // 1) Register Qdrant-backed vector store services here (recommended if Qdrant is required).
+    //    Example (pseudo-code, replace with your project's Qdrant integration):
+    //      builder.Services.AddQdrantVectorStore(qdrantClientOrConnectionString);
+    //      builder.Services.AddQdrantCollection<string, IngestedChunk>(IngestedChunk.CollectionName, qdrantOptions);
+    //
+    // 2) Fall back to the local SQLite vector store if Qdrant registration is not available.
+    //    The code below falls back to the LocalDatabase registration to avoid DI errors.
+    //
+    // If you prefer strict behavior, replace the fallback with an exception that instructs how to register Qdrant.
+    var qdrantHost = builder.Configuration["ChatApp_RAG:VectorDatabase:Qdrant:Host"] ?? "localhost";
+    var qdrantPortString = builder.Configuration["ChatApp_RAG:VectorDatabase:Qdrant:Port"];
+    if (!int.TryParse(qdrantPortString, out var qdrantPort))
+    {
+        qdrantPort = 6334;
+    }
+
+    // Create Qdrant client for possible future use (keeps parity with original code).
+    var qdrantClient = new QdrantClient(qdrantHost, qdrantPort);
+
+    // NOTE: The project previously did not register Qdrant-backed VectorStore types.
+    // If you have extension methods to register Qdrant vector stores, call them here.
+    // As a safe fallback, register the sqlite-based services so DI consumers resolve.
+    var vectorStorePath = Path.Combine(AppContext.BaseDirectory, "vector-store.db");
+    var fallbackConnectionString = $"Data Source={vectorStorePath}";
+
+    builder.Services.AddSqliteVectorStore(_ => fallbackConnectionString);
+    builder.Services.AddSqliteCollection<string, IngestedChunk>(IngestedChunk.CollectionName, fallbackConnectionString);
 }
 else
 {
-    vectorStoreConnectionString = builder.Configuration["ChatApp_RAG:VectorDatabase:LocalDatabase:ConnectionString"];
+    var vectorStoreConnectionString = builder.Configuration["ChatApp_RAG:VectorDatabase:LocalDatabase:ConnectionString"];
     if (string.IsNullOrWhiteSpace(vectorStoreConnectionString))
     {
         var vectorStorePath = Path.Combine(AppContext.BaseDirectory, "vector-store.db");

@@ -1,17 +1,26 @@
 <div class="chat-header-container main-background-gradient">
     <div class="chat-header-controls page-width">
-        <button class="btn-default" @onclick="@OnNewChat">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="new-chat-icon">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            New chat
-        </button>
-    </div>
+        <div class="chat-header-actions">
+            <button class="btn-default" @onclick="OnNewChat">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="new-chat-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                New chat
+            </button>
 
-    <h1 class="page-width">ChatApp_RAG</h1>
+            <button class="btn-default" @onclick="OnAddNewImage">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="new-chat-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5h18M3 12h18M3 16.5h18" />
+                </svg>
+                Add new image
+            </button>
+        </div>
+    </div>
 </div>
 
 @code {
     [Parameter]
     public EventCallback OnNewChat { get; set; }
+    [Parameter]
+    public EventCallback OnAddNewImage { get; set; }
 }
