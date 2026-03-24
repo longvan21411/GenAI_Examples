@@ -1,19 +1,98 @@
 @page "/image-upload"
 @using Microsoft.AspNetCore.Components.Forms
+@using System.IO
 
 <h3>Image Upload</h3>
-<p>Upload images to associate with the assistant (placeholder page).</p>
+<p>Upload images to associate with the assistant.</p>
 
 <InputFile OnChange="OnInputFileChange" multiple />
 
+@if (uploadedImages.Any())
+{
+    <div class="image-grid">
+        @foreach (var img in uploadedImages)
+        {
+            <div class="image-cell">
+                <img src="@img.DataUrl" alt="@img.Name" />
+                <div class="cell-footer">
+                    <button class="btn-default" @onclick="() => OnFindSimilarity(img)">Find Similarity</button>
+                </div>
+            </div>
+        }
+    </div>
+}
+
 @code {
+    private const long MaxFileSize = 5 * 1024 * 1024; // 5 MB
+    private readonly List<UploadedImage> uploadedImages = new();
+    private readonly List<string> messages = new();
+
     private async Task OnInputFileChange(InputFileChangeEventArgs e)
     {
+        messages.Clear();
+
         foreach (var file in e.GetMultipleFiles())
         {
-            // Placeholder: you can save files to wwwroot or send to server API
-            Console.WriteLine($"Received file: {file.Name}, size: {file.Size}");
-            await Task.CompletedTask;
+            var name = file.Name ?? "(unnamed)";
+            var ext = Path.GetExtension(name)?.ToLowerInvariant() ?? string.Empty;
+
+            if (ext != ".jpg" && ext != ".png")
+            {
+                messages.Add($"Skipped '{name}': only .jpg and .png files are allowed.");
+                continue;
+            }
+
+            if (file.Size > MaxFileSize)
+            {
+                messages.Add($"'{name}' exceeds the maximum size of {FormatBytes(MaxFileSize)} (selected: {FormatBytes(file.Size)}).");
+                continue;
+            }
+
+            try
+            {
+                // Read file into memory and convert to data URL for display
+                using var ms = new MemoryStream();
+                // Limit stream to MaxFileSize to protect from large files
+                await file.OpenReadStream(MaxFileSize).CopyToAsync(ms);
+                var bytes = ms.ToArray();
+                var base64 = Convert.ToBase64String(bytes);
+                var contentType = file.ContentType ?? (ext == ".png" ? "image/png" : "image/jpeg");
+                var dataUrl = $"data:{contentType};base64,{base64}";
+
+                uploadedImages.Add(new UploadedImage
+                {
+                    Name = name,
+                    DataUrl = dataUrl,
+                    Size = file.Size
+                });
+            }
+            catch (Exception ex)
+            {
+                messages.Add($"Failed to load '{name}': {ex.Message}");
+            }
         }
+
+        StateHasChanged();
+    }
+
+    private void OnFindSimilarity(UploadedImage img)
+    {
+        // Placeholder: wire up similarity search or other action here.
+        messages.Insert(0, $"Find Similarity clicked for '{img.Name}'.");
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        if (bytes >= 1 << 30) return $"{bytes / (1 << 30)} GB";
+        if (bytes >= 1 << 20) return $"{bytes / (1 << 20)} MB";
+        if (bytes >= 1 << 10) return $"{bytes / (1 << 10)} KB";
+        return $"{bytes} B";
+    }
+
+    private class UploadedImage
+    {
+        public string Name { get; set; } = string.Empty;
+        public string DataUrl { get; set; } = string.Empty;
+        public long Size { get; set; }
     }
 }

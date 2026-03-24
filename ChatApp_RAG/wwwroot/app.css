@@ -1,3 +1,4 @@
+File: ChatApp_RAG\wwwroot\app.css
 @import url('lib/tailwindcss/dist/preflight.css');
 
 :root {
@@ -253,5 +254,77 @@ html.dark {
         min-width: 2rem;
         margin-top: 0.08rem; /* slightly smaller on small screens */
     }
+}
+
+/* Image upload grid */
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* five columns */
+    gap: 1rem;
+    margin: 1.25rem auto; /* center the grid and add vertical spacing */
+    max-width: 1400px; /* constrain grid width so it centers on the page */
+    padding: 0 1rem; /* keep a little horizontal padding */
+}
+
+.image-cell {
+    background: var(--surface);
+    border: 1px solid var(--input-border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    box-sizing: border-box;
+}
+
+.image-cell img {
+    width: 100%;
+    height: 220px; /* bigger display size */
+    object-fit: cover; /* ensure image fills and is cropped if necessary */
+    display: block;
+}
+
+.cell-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* center button horizontally */
+    gap: 0.5rem;
+    padding: 0.75rem; /* a little more vertical spacing */
+    box-sizing: border-box;
+}
+
+/* Make action button bold and slightly larger */
+.cell-footer .btn-default {
+    font-weight: 700;
+    padding: 0.45rem 0.75rem;
+}
+
+/* On very small screens, make the button fill the available width for easier tapping */
+@media (max-width: 480px) {
+    .cell-footer .btn-default {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* responsive adjustments */
+@media (max-width: 1200px) {
+    .image-grid { grid-template-columns: repeat(4, 1fr); }
+    .image-cell img { height: 200px; }
+}
+
+@media (max-width: 1024px) {
+    .image-grid { grid-template-columns: repeat(3, 1fr); }
+    .image-cell img { height: 180px; }
+}
+
+@media (max-width: 768px) {
+    .image-grid { grid-template-columns: repeat(2, 1fr); }
+    .image-cell img { height: 220px; }
+}
+
+@media (max-width: 480px) {
+    .image-grid { grid-template-columns: repeat(1, 1fr); }
+    .image-cell img { height: 260px; }
 }
 /* end of file */

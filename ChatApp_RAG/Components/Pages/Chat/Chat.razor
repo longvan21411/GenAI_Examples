@@ -18,8 +18,7 @@
 
 <div class="chat-container">
     <ChatSuggestions OnSelected="@AddUserMessageAsync" @ref="@chatSuggestions" />
-    <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" />
-    <SurveyPrompt /> @* Remove this line to eliminate the template survey message *@
+    <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" />   
 </div>
 
 @code {
