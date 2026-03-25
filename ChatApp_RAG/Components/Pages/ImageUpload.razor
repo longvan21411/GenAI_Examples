@@ -4,7 +4,6 @@
 
 <h3>Image Upload</h3>
 <p>Upload images to associate with the assistant.</p>
-
 <InputFile OnChange="OnInputFileChange" multiple />
 
 @if (uploadedImages.Any())
@@ -13,19 +12,46 @@
         @foreach (var img in uploadedImages)
         {
             <div class="image-cell">
-                <img src="@img.DataUrl" alt="@img.Name" />
-                <div class="cell-footer">
-                    <button class="btn-default" @onclick="() => OnFindSimilarity(img)">Find Similarity</button>
-                </div>
+                <img src="@img.DataUrl" alt="@img.Name" />               
             </div>
         }
     </div>
 }
 
+<div class="upload-controls">    
+    <div class="upload-meta">
+        <br>
+        <label class="meta-field">
+            <div class="meta-label">Category</div>
+            <select @bind="selectedCategory">
+                <option value="">-- Select category --</option>
+                <option value="Cat">Cat</option>
+                <option value="Dog">Dog</option>
+                <option value="Wild animals">Wild animals</option>
+            </select>
+        </label>
+        <br>
+        <label class="meta-field">
+            <div class="meta-label">Description</div>
+            <textarea @bind="description" rows="7" placeholder="Optional description..."></textarea>
+        </label>
+        <br>
+        <div class="action-bar">
+            <button class="btn-default" @onclick="OnAddImagesAsync" disabled="@(uploadedImages.Count == 0)">Add images</button>
+            <button class="btn-subtle" @onclick="OnCancelSelection" disabled="@(uploadedImages.Count == 0)">Cancel</button>
+        </div>
+    </div>
+</div>
+
+
+
 @code {
     private const long MaxFileSize = 5 * 1024 * 1024; // 5 MB
     private readonly List<UploadedImage> uploadedImages = new();
     private readonly List<string> messages = new();
+
+    private string selectedCategory = string.Empty;
+    private string description = string.Empty;
 
     private async Task OnInputFileChange(InputFileChangeEventArgs e)
     {
@@ -75,6 +101,27 @@
         StateHasChanged();
     }
 
+    private Task OnAddImagesAsync()
+    {
+        foreach (var img in uploadedImages)
+        {
+            img.IsConfirmed = true;
+            img.Category = selectedCategory;
+            img.Description = description;
+        }
+
+        messages.Insert(0, $"{uploadedImages.Count} image(s) confirmed.");
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private void OnCancelSelection()
+    {
+        uploadedImages.Clear();
+        messages.Insert(0, "Image selection canceled.");
+        StateHasChanged();
+    }
+
     private void OnFindSimilarity(UploadedImage img)
     {
         // Placeholder: wire up similarity search or other action here.
@@ -94,5 +141,8 @@
         public string Name { get; set; } = string.Empty;
         public string DataUrl { get; set; } = string.Empty;
         public long Size { get; set; }
+        public bool IsConfirmed { get; set; }
+        public string Category { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
     }
 }

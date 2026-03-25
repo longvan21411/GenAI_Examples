@@ -126,29 +126,30 @@ html.dark {
     padding: 1rem 0 2rem 0;
     width: 100%;
     box-sizing: border-box;
+    /* leave space for fixed left-panel */
+    padding-left: 220px; /* matches left-panel fixed width + spacing */
 }
 
 .left-panel {
-    width: 200px;
+    width: 200px; /* fixed width for the sidebar */
     padding: 1rem;
-    height: calc(100vh - 64px); /* reduced from earlier value */
-    position: sticky;
-    top: 56px; /* matches smaller header height */
+    /* make the left panel fixed so it stays visible while scrolling */
+    position: fixed;
+    left: 0;
+    top: 56px; /* matches header height */
+    height: calc(100vh - 56px);
+    box-sizing: border-box;
+    z-index: 30;
 }
 
-.left-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-/* content layout tweaks for chat page */
+/* Ensure content-area adapts when sidebar is fixed */
 .content-area {
     flex: 1 1 auto;
     padding: 1rem;
-    min-height: calc(100vh - 120px); /* reduced to match smaller header */
+    min-height: calc(100vh - 120px);
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
 }
 
 /* All children except the bottom chat container should grow and scroll */
@@ -327,4 +328,51 @@ html.dark {
     .image-grid { grid-template-columns: repeat(1, 1fr); }
     .image-cell img { height: 260px; }
 }
+
+/* Make the left panel fixed */
+@media (max-width: 768px) {
+    .left-panel {
+        position: static;
+        width: 100%;
+        height: auto;
+        top: auto;
+    }
+
+    .app-shell {
+        padding-left: 0;
+        flex-direction: column;
+    }
+}
+
+/* Ensure description textarea uses 95% of the viewport (body) width when inside the content area */
+.content-area .upload-meta textarea,
+.content-area .meta-field textarea {
+    width: 80vw; /* 95% of the viewport width */
+    max-width: 80vw;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 3.5rem;
+}
+
+/* On small screens, use almost full width with reduced horizontal inset */
+@media (max-width: 640px) {
+    .content-area .upload-meta textarea,
+    .content-area .meta-field textarea {
+        width: calc(100vw - 2rem);
+        max-width: calc(100vw - 2rem);
+    }
+}
+
+/* Meta area next to InputFile; stack on small screens */
+.upload-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* increased spacing between meta fields */
+}
+
+.meta-field {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
 /* end of file */
