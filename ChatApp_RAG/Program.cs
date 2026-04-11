@@ -77,6 +77,15 @@ var embeddingGenerator = rawEmbeddingClient.AsIEmbeddingGenerator();
 
 // Configure vector store based on appsettings. Support LocalDatabase (SQLite) by default.
 var activeDb = builder.Configuration["ChatApp_RAG:VectorDatabase:ActiveVectorDatabase"] ?? "LocalDatabase";
+var qdrantHost = builder.Configuration["ChatApp_RAG:VectorDatabase:QdrantDatabase:Host"] ?? "localhost";
+var qdrantPortString = builder.Configuration["ChatApp_RAG:VectorDatabase:QdrantDatabase:GrpcAPIPort"];
+if (!int.TryParse(qdrantPortString, out var qdrantPort))
+{
+    qdrantPort = 6334;
+}
+
+builder.Services.AddSingleton(new QdrantClient(qdrantHost, qdrantPort));
+builder.Services.AddSingleton<QdrantImageService>();
 
 if (string.Equals(activeDb, "QdrantDatabase", StringComparison.OrdinalIgnoreCase))
 {
@@ -94,16 +103,6 @@ if (string.Equals(activeDb, "QdrantDatabase", StringComparison.OrdinalIgnoreCase
     //    The code below falls back to the LocalDatabase registration to avoid DI errors.
     //
     // If you prefer strict behavior, replace the fallback with an exception that instructs how to register Qdrant.
-    var qdrantHost = builder.Configuration["ChatApp_RAG:VectorDatabase:Qdrant:Host"] ?? "localhost";
-    var qdrantPortString = builder.Configuration["ChatApp_RAG:VectorDatabase:Qdrant:Port"];
-    if (!int.TryParse(qdrantPortString, out var qdrantPort))
-    {
-        qdrantPort = 6334;
-    }
-
-    // Create Qdrant client for possible future use (keeps parity with original code).
-    var qdrantClient = new QdrantClient(qdrantHost, qdrantPort);
-
     // NOTE: The project previously did not register Qdrant-backed VectorStore types.
     // If you have extension methods to register Qdrant vector stores, call them here.
     // As a safe fallback, register the sqlite-based services so DI consumers resolve.

@@ -1,6 +1,7 @@
 @page "/image-upload"
 @using Microsoft.AspNetCore.Components.Forms
 @using System.IO
+@inject QdrantImageService ImageService
 
 <h3>Image Upload</h3>
 <p>Upload images to associate with the assistant.</p>
@@ -42,6 +43,16 @@
         </div>
     </div>
 </div>
+
+@if (messages.Count > 0)
+{
+    <div class="upload-messages">
+        @foreach (var message in messages)
+        {
+            <div>@message</div>
+        }
+    </div>
+}
 
 
 
@@ -89,7 +100,9 @@
                 {
                     Name = name,
                     DataUrl = dataUrl,
-                    Size = file.Size
+                    Size = file.Size,
+                    Content = bytes,
+                    ContentType = contentType
                 });
             }
             catch (Exception ex)
@@ -101,18 +114,40 @@
         StateHasChanged();
     }
 
-    private Task OnAddImagesAsync()
+    private Task OnAddImagesAsync() => SaveImagesAsync();
+
+    private async Task SaveImagesAsync()
     {
         foreach (var img in uploadedImages)
         {
-            img.IsConfirmed = true;
-            img.Category = selectedCategory;
-            img.Description = description;
+            if (img.IsConfirmed)
+            {
+                continue;
+            }
+
+            try
+            {
+                var result = await ImageService.StoreImageAsync(
+                    img.Name,
+                    img.ContentType,
+                    img.Content,
+                    description,
+                    selectedCategory);
+
+                img.IsConfirmed = true;
+                img.Category = selectedCategory;
+                img.Description = result.Description;
+                img.StoredPath = result.RelativePath;
+                img.PointId = result.PointId;
+                messages.Insert(0, $"Stored '{img.Name}' to '{result.RelativePath}' and upserted Qdrant point {result.PointId}.");
+            }
+            catch (Exception ex)
+            {
+                messages.Insert(0, $"Failed to store '{img.Name}': {ex.Message}");
+            }
         }
 
-        messages.Insert(0, $"{uploadedImages.Count} image(s) confirmed.");
         StateHasChanged();
-        return Task.CompletedTask;
     }
 
     private void OnCancelSelection()
@@ -141,8 +176,12 @@
         public string Name { get; set; } = string.Empty;
         public string DataUrl { get; set; } = string.Empty;
         public long Size { get; set; }
+        public byte[] Content { get; set; } = [];
+        public string ContentType { get; set; } = string.Empty;
         public bool IsConfirmed { get; set; }
         public string Category { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public string StoredPath { get; set; } = string.Empty;
+        public Guid? PointId { get; set; }
     }
 }
