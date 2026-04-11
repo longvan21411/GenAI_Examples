@@ -26,6 +26,8 @@ var openAIOptions = new OpenAIClientOptions()
 
 // create a chat client
 var client = new OpenAIClient(credential, openAIOptions).GetChatClient(model).AsIChatClient();
+ 
+
 
 #region Basic in completion
 

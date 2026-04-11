@@ -185,26 +185,32 @@ html.dark {
     width: 100%;
     display: block;
     box-sizing: border-box;
+    /* ensure the container can accommodate a taller textarea */
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
 }
 
 .input-box textarea {
     width: 100%;
     resize: none;
-    padding: 0.5rem;
-    padding-right: 3.5rem; /* leave space for the send button */
+    padding: 0.75rem; /* increased padding for larger input */
+    padding-right: 4.5rem; /* leave space for the send button */
     border-radius: 0.375rem;
     border: 1px solid var(--input-border);
     box-sizing: border-box;
+    min-height: 5rem; /* make the textarea taller */
+    line-height: 1rem;
 }
 
 /* Tools container that holds the send button */
 .tools {
     position: absolute;
-    right: 0.5rem;
-    top: 0.5rem; /* align with textarea top padding */
+    right: 0.6rem;
+    top: 60%; /* vertically center relative to the textarea */
+    transform: translateY(-50%);
     display: flex;
-    align-items: flex-start; /* align children to the top of the textarea */
-    gap: 0.5rem;
+    align-items: center; /* center children vertically */
+    gap: 0.6rem;
     pointer-events: none; /* allow textarea focus unless children enable pointer events */
 }
 
@@ -216,17 +222,17 @@ html.dark {
     background: var(--accent);
     color: white;
     border: none;
-    padding: 0.35rem 0.6rem; /* reduce vertical padding so top aligns well */
+    padding: 0.45rem 0.7rem; /* slightly larger padding for taller input */
     border-radius: 0.375rem;
     height: auto;
-    min-width: 2.25rem;
+    min-width: 2.5rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 1px 2px rgba(0,0,0,0.04);
     cursor: pointer;
-    align-self: flex-start; /* ensure button aligns to top of the tools container */
-    margin-top: 0.1rem; /* reduced top offset to align closer to textarea top */
+    align-self: center; /* center inside tools */
+    margin-top: 0; /* remove previous offset */
 }
 
 .send-button[disabled] {
@@ -242,17 +248,18 @@ html.dark {
 /* Small screens: reduce right padding and button size slightly */
 @media (max-width: 640px) {
     .input-box textarea {
-        padding-right: 3rem;
+        padding-right: 3.5rem;
     }
 
     .tools {
         right: 0.5rem;
-        top: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
     }
 
     .send-button {
-        padding: 0.3rem 0.45rem;
-        min-width: 2rem;
+        padding: 0.35rem 0.5rem;
+        min-width: 2.1rem;
         margin-top: 0.08rem; /* slightly smaller on small screens */
     }
 }
@@ -376,3 +383,33 @@ html.dark {
 }
 
 /* end of file */
+
+/* Upload icon/text inside chat input */
+.upload-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+/* visually hide the real file input but keep it accessible */
+.file-input-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.upload-btn {
+    font-size: 0.9rem;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--input-border);
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.25rem;
+}

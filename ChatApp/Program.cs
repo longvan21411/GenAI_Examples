@@ -13,15 +13,16 @@ IConfiguration config = new ConfigurationBuilder()
 
 var endpoint = new Uri("https://models.github.ai/inference");
 
-var token = config["GitHubModels:Token"];// this should be set in user secrets with the key "GitHubAIModels:Token"
+var token = config["GitHubAIModels:Token"];// this should be set in user secrets with the key "GitHubAIModels:Token"
 if (string.IsNullOrWhiteSpace(token))
 {
-    throw new InvalidOperationException("API token 'GitHubModels:Token' is missing or empty.");
+    throw new InvalidOperationException("API token 'GitHubAIModels:Token' is missing or empty.");
 }
 
 // NOTE: confirm ApiKeyCredential is provided by the OpenAI package you installed
 var credential = new ApiKeyCredential(token) ?? throw new InvalidOperationException("invalid token");
-var model = "openai/gpt-5-mini";
+//var model = "openai/gpt-5-mini";
+var model = "openai/gpt-4o-mini";
 var openAIOptions = new OpenAIClientOptions()
 {
     Endpoint = endpoint
@@ -46,6 +47,8 @@ List<ChatMessage> chatHistories = new()
         At the end of your response, ask if there anything else you can help with.
     """)
 };
+Console.WriteLine("The context for chat is: ");
+Console.WriteLine(chatHistories.First().Text);
 
 while (true)
 {
@@ -92,6 +95,12 @@ while (true)
         Console.WriteLine();
         // Keep assistant reply in history for context
         chatHistories.Add(new ChatMessage(ChatRole.Assistant, response));
+    }
+    catch (ClientResultException cre) when (cre.Status == 429)
+    {
+        Console.WriteLine("\nRate limited. Waiting 60 seconds before retrying...");       
+        chatHistories.RemoveAt(chatHistories.Count - 1);
+        await Task.Delay(TimeSpan.FromSeconds(60));
     }
     catch (OperationCanceledException)
     {
